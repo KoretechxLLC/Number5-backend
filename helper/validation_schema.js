@@ -1,5 +1,4 @@
-const joi = require("joi")
-
+const joi = require("joi");
 
 
 const authSchema = joi.object({
@@ -12,7 +11,7 @@ const authSchema = joi.object({
     gender: joi.string().required(),
     date_of_birth : joi.string(),
     phone_number: joi.string().regex(/^(?:\+?44|0)7(?:\d{3}|\d{4})\d{6}$/),
-full_name: joi.string().required(),
+    full_name: joi.string().required(),
     address : joi?.string().required(),
     occupation:joi?.string().required(),
     height:joi?.number().required(),
@@ -37,10 +36,15 @@ const loginSchema = joi.object({
 }).or('membership_id', 'username').required();
 
 
+const approvedUserSchema = joi.object({
+    email: joi.string().email().lowercase().required(),
+})
+
 
 
 
 module.exports = {
     authSchema : authSchema,
-    loginSchema: loginSchema
+    loginSchema: loginSchema,
+    approvedUserSchema : approvedUserSchema
 }

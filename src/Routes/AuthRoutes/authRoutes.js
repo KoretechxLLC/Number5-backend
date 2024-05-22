@@ -12,6 +12,8 @@ authRoutes.post("/register",uploadProfileImage.single('profileImage'),AuthContro
 
 authRoutes.post("/login",AuthController.login)
 
+authRoutes.post("/approved-user",AuthController.approvedUser)
+
 
 
 
