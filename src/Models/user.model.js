@@ -57,7 +57,6 @@ const UserSchema = new Schema({
     type: Number,
     required: true,
   },
-
   weight: {
     type: Number,
     required: true,
@@ -90,11 +89,9 @@ const UserSchema = new Schema({
   },
   membership_id: {
     type: String,
-    unique: true,
   },
   username: {
     type: String,
-    unique: true,
   },
   password: {
     type: String,

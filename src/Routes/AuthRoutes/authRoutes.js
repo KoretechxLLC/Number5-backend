@@ -9,10 +9,11 @@ const authRoutes = express.Router()
 
 authRoutes.post("/register",uploadProfileImage.single('profileImage'),AuthController.registerUser)
 
+authRoutes.put("/approved-user",AuthController.approvedUser)
 
 authRoutes.post("/login",AuthController.login)
 
-authRoutes.post("/approved-user",AuthController.approvedUser)
+authRoutes.put("/block-user",AuthController.blockedUser)
 
 
 

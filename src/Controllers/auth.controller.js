@@ -117,6 +117,7 @@ const AuthController = {
         refreshToken: refreshToken,
       });
     } catch (err) {
+      console.log(err, "err");
       if (err.isJoi === true) {
         next(createError.BadRequest());
         return;
@@ -127,18 +128,18 @@ const AuthController = {
 
   login: async (req, res, next) => {
     try {
-      let { membership_id, username, password } = req.body;
+      let { username, password } = req.body;
 
-      if (!password || (!membership_id && !username))
+      if (!password || !username)
         throw createError?.BadRequest("Required fields are missing");
 
       const result = await loginSchema.validateAsync(req.body);
 
       let user;
 
-      if (result?.membership_id) {
-        user = await UserModel.findOne({ membership_id: membership_id });
-      } else if (result?.username) {
+      user = await UserModel.findOne({ membership_id: username });
+
+      if (!user || user.length == 0) {
         user = await UserModel.findOne({ username: username });
       }
 
@@ -200,12 +201,11 @@ const AuthController = {
   },
 
   approvedUser: async (req, res, next) => {
-    let session = null; 
+    let session = null;
 
     try {
-      
       session = await mongoose.startSession();
-      session.startTransaction(); 
+      session.startTransaction();
 
       let { email } = req.body;
 
@@ -216,7 +216,7 @@ const AuthController = {
       const result = await approvedUserSchema.validateAsync(req.body);
       let user = await UserModel.findOne({ email: result.email }).session(
         session
-      ); 
+      );
 
       if (!user || user.length === 0) {
         throw createError.NotFound("User not found");
@@ -234,7 +234,7 @@ const AuthController = {
       user.password = password;
       user.username = username;
       user.user_status = "approved";
-      user.approved_date = new Date()
+      user.approved_date = new Date();
 
       // Save changes within the session
       const savedUser = await user.save({ session });
@@ -258,7 +258,6 @@ const AuthController = {
       const mailInfo = await sendEmail(user.email, subject, message);
 
       if (mailInfo && mailInfo.messageId) {
-
         await session.commitTransaction();
         res.status(200).json({
           message: "User approved successfully",
@@ -270,13 +269,36 @@ const AuthController = {
       if (session) {
         await session.abortTransaction();
       }
-      if(err.isJoi) next(createError?.BadRequest("Invalid Email"))
+      if (err.isJoi) next(createError?.BadRequest("Invalid Email"));
       next(err);
     } finally {
-      
       if (session) {
         session.endSession();
       }
+    }
+  },
+
+  blockedUser: async (req, res, next) => {
+    try {
+
+        let {email} = req.body
+
+        if(!email) throw createError.BadRequest()
+
+        let user = await UserModel.findOneAndUpdate({email:email},{user_status : "blocked"},{new : true})
+
+        if(!user){
+
+            throw createError.NotFound("User not found")
+
+        }
+
+        res.status(200).json({
+            message  : "User has been blocked successfully",
+        })
+    
+    } catch (err) {
+      next(err);
     }
   },
 };
