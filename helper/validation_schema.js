@@ -30,16 +30,17 @@ full_name: joi.string().required(),
 })
 
 
-const userSchema = joi.object({
-    fullName: joi.string(),
-    email: joi.string().email().lowercase().required(),
-    
-})
+const loginSchema = joi.object({
+    password: joi.string().required(),
+    membership_id: joi.string(),
+    username: joi.string()
+}).or('membership_id', 'username').required();
+
 
 
 
 
 module.exports = {
     authSchema : authSchema,
-    userSchema: userSchema
+    loginSchema: loginSchema
 }
