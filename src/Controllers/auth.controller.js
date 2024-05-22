@@ -1,11 +1,13 @@
 const createError = require("http-errors")
 const joi = require("joi")
-const { authSchema } = require("../../helper/validation_schema")
+const { authSchema, loginSchema } = require("../../helper/validation_schema")
 const UserModel = require("../Models/user.model")
 const { signAccessToken, signRefreshToken } = require("../../helper/jwt_helper")
 
 
 
+  
+  
 const AuthController = {
 
     registerUser: async (req, res, next) => {
@@ -100,7 +102,84 @@ const AuthController = {
 
 
 
-    }
+    },
+
+    login: async (req, res, next) => {
+        try {
+          let { membership_id, username, password } = req.body;
+    
+          if (!password || (!membership_id && !username))
+            throw createError?.BadRequest("Required fields are missing");
+    
+          const result = await loginSchema.validateAsync(req.body);
+    
+          let user;
+    
+          if (result?.membership_id) {
+            user = await UserModel.findOne({ membership_id: membership_id });
+          } else if (result?.username) {
+            user = await UserModel.findOne({ username: username });
+          }
+    
+          if (!user || user?.length == 0) {
+            throw createError.NotFound("User Not Found");
+          }
+    
+    
+          let checkPassword = await user.isValidPassword(result?.password);
+    
+    
+          if (!checkPassword) {
+            throw createError.Unauthorized("Invalid Username/Password");
+          }
+    
+          if (user?.user_status?.toLowerCase() == "pending") {
+            throw createError?.Unauthorized("Your Profile is in pending");
+          }
+    
+          if (user?.user_status?.toLowerCase() == "blocked") {
+            throw createError?.Unauthorized("Your Profile has been blocked");
+          }
+    
+          const accessToken = await signAccessToken(user.id);
+    
+          const refreshToken = await signRefreshToken(user.id);
+    
+          let dataToSend = {
+            registration_type: user?.registration_type,
+            couples_type: user?.couples_type,
+            event_fee: user?.event_fee,
+            gender: user?.gender,
+            full_name: user?.full_name,
+            date_of_birth: user?.date_of_birth,
+            email: user?.email,
+            phone_number: user?.phone_number,
+            address: user?.address,
+            occupation: user?.occupation,
+            height: user?.height,
+            weight: user?.weight,
+            id: user?.id,
+            sexuality: user?.sexuality,
+            life_style: user?.life_style,
+            wanted_experience: user?.wanted_experience,
+            user_quality: user?.user_quality,
+            user_status : user?.user_status,
+            is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+          };
+    
+          res.status(200).json({
+            message: "User Successfully Logged In",
+            data: dataToSend,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+          });
+        } catch (err) {
+          if (err.isJoi) next(createError?.BadRequest("Invalid Fields"));
+    
+          next(err);
+        }
+      },
+    
 
 
 }

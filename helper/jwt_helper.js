@@ -27,7 +27,7 @@ module.exports = {
             jwt.sign(payload, secret_key, options, (err, token) => {
 
                 if (err) {
-                    console.log(err)
+                    
                     reject(createError.InternalServerError())
                     return
                 }
@@ -67,7 +67,7 @@ module.exports = {
             jwt.sign(payload, secret_key, options, async (err, token) => {
 
                 if (err) {
-                    console.log(err)
+                    
                     reject(createError.InternalServerError())
                     return
                 }
