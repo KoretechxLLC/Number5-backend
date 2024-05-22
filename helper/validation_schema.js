@@ -22,10 +22,7 @@ const authSchema = joi.object({
     user_quality : joi.string().required(),
     is_agree_terms_and_conditions : joi.boolean().required(),
     user_status : joi.string(),
-    membership_id : joi.string(),
-    username : joi.string().alphanum(),   
     email: joi.string().email().lowercase().required(),
-    password: joi.string().min(8),
 })
 
 
