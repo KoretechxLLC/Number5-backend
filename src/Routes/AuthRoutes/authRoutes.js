@@ -13,6 +13,8 @@ authRoutes.post("/register",uploadProfileImage.single('profileImage'),AuthContro
 
 authRoutes.post("/login",AuthController.login)
 
+authRoutes.post("/refresh-token",AuthController.refreshToken)
+
 authRoutes.put("/approved-user",verifyAccessToken,verifyAdminRole,AuthController.approvedUser)
 
 authRoutes.put("/block-user",verifyAccessToken,verifyAdminRole,AuthController.blockedUser)
