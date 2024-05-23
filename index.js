@@ -1,5 +1,6 @@
 const express = require("express")
 const cors = require("cors")
+const protectedRoutes = require("./src/Routes/ProtectedRoutes/ProtectedRoutes")
 const authRoutes = require("./src/Routes/AuthRoutes/authRoutes")
 const createError = require("http-errors")
 const morgan = require("morgan")
@@ -20,11 +21,8 @@ app.use(express.urlencoded({extended:true}))
 
 
 
+app.use('/api',protectedRoutes)
 app.use('/auth',authRoutes)
-
-
-
-
 
 app.use(async(req,res,next)=>{
 

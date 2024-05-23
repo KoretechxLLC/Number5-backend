@@ -2,8 +2,8 @@ const joi = require("joi");
 
 const authSchema = joi.object({
   registration_type: joi.string()?.lowercase().required(),
-  couples_type: joi.string().lowercase().required(),
-  event_fee: joi.number().required(),
+  couples_type: joi.string().lowercase(),
+  registration_fee: joi.number().required(),
   profile_pic: joi.string().required(),
   is_fee_paid: joi.boolean(),
   gender: joi.string().required(),

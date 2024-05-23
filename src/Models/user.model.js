@@ -9,9 +9,8 @@ const UserSchema = new Schema({
   },
   couples_type: {
     type: String,
-    required: true,
   },
-  event_fee: {
+  registration_fee: {
     type: Number,
     required: true,
   },
