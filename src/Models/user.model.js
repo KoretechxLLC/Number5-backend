@@ -96,12 +96,12 @@ const UserSchema = new Schema({
   password: {
     type: String,
   },
-  approved_date : {
-    type : Date
+  approved_date: {
+    type: Date,
   },
-  role : {
-    type : String,
-    default : "user"
+  role: {
+    type: String,
+    default: "user",
   },
   created_at: {
     type: Date,

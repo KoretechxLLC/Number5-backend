@@ -19,6 +19,7 @@ authRoutes.put("/block-user",verifyAccessToken,verifyAdminRole,AuthController.bl
 
 authRoutes.post("/forgot-password",AuthController.forgotPassword)
 
+authRoutes.post("/change-password",AuthController.changePassword)
 
 
 
