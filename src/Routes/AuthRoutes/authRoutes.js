@@ -1,6 +1,8 @@
 const express = require("express")
 const AuthController = require("../../Controllers/auth.controller")
 const uploadProfileImage = require("../../../utils/upload.profileImage")
+const { verifyAccessToken } = require("../../../helper/jwt_helper")
+const { verifyAdminRole } = require("../../../helper/check_role")
 
 
 
@@ -9,12 +11,13 @@ const authRoutes = express.Router()
 
 authRoutes.post("/register",uploadProfileImage.single('profileImage'),AuthController.registerUser)
 
-authRoutes.put("/approved-user",AuthController.approvedUser)
-
 authRoutes.post("/login",AuthController.login)
 
-authRoutes.put("/block-user",AuthController.blockedUser)
+authRoutes.put("/approved-user",verifyAccessToken,verifyAdminRole,AuthController.approvedUser)
 
+authRoutes.put("/block-user",verifyAccessToken,verifyAdminRole,AuthController.blockedUser)
+
+authRoutes.post("/forgot-password",AuthController.forgotPassword)
 
 
 
