@@ -9,6 +9,7 @@ const UserModel = require("../Models/user.model");
 const {
   signAccessToken,
   signRefreshToken,
+  verifyRefreshToken,
 } = require("../../helper/jwt_helper");
 const {
   generateRandomPassword,
@@ -126,7 +127,6 @@ const AuthController = {
       next(err);
     }
   },
-
   login: async (req, res, next) => {
     try {
       let { username, password } = req.body;
@@ -201,7 +201,6 @@ const AuthController = {
       next(err);
     }
   },
-
   approvedUser: async (req, res, next) => {
     let session = null;
 
@@ -279,7 +278,6 @@ const AuthController = {
       }
     }
   },
-
   blockedUser: async (req, res, next) => {
     try {
       let { email } = req.body;
@@ -303,7 +301,6 @@ const AuthController = {
       next(err);
     }
   },
-
   forgotPassword: async (req, res, next) => {
     try {
       const { email } = req.body;
@@ -365,6 +362,26 @@ const AuthController = {
       if (err.isJoi) return next(createError.BadRequest());
 
       next(err);
+    }
+  },
+  refreshToken: async (req, res, next) => {
+    try {
+      let { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        throw createError.BadRequest("Unauthorized");
+      }
+
+      const userId = await verifyRefreshToken(refreshToken);
+
+      const accessToken = await signAccessToken(userId);
+
+      res.json({
+        accessToken: accessToken,
+      });
+    } catch (error) {
+      
+      next(error);
     }
   },
 };
