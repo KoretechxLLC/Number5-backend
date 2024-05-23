@@ -13,6 +13,7 @@ const {
   generateRandomPassword,
   generateMembershipID,
   generateUsername,
+  generateOTP
 } = require("../../helper/generate_random_passwords");
 const mongoose = require("mongoose");
 const { sendEmail } = require("../../helper/send_email");
@@ -117,7 +118,6 @@ const AuthController = {
         refreshToken: refreshToken,
       });
     } catch (err) {
-      console.log(err, "err");
       if (err.isJoi === true) {
         next(createError.BadRequest());
         return;
@@ -185,6 +185,7 @@ const AuthController = {
         user_quality: user?.user_quality,
         user_status: user?.user_status,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+        role : user?.role
       };
 
       res.status(200).json({
@@ -301,6 +302,61 @@ const AuthController = {
       next(err);
     }
   },
+
+  forgotPassword : async (req,res,next) => {
+
+    try{
+        const {email} = req.body
+
+        if(!email) throw createError?.BadRequest("Email is missing")
+
+      
+        let user = await UserModel.findOne({email : email})
+
+        if(!user || user.length == 0) throw createError.NotFound("User not found")
+
+        let otp = await generateOTP()
+
+        let subject = "Forget passwod otp"
+
+        let message = `Here is your otp code ${otp}`
+
+        let mailInfo = await sendEmail(email,subject,message)
+
+        if (mailInfo && mailInfo.messageId) {
+
+          res.status(200).json({
+            message: "Otp code successfully send in email",
+            otp : otp
+          });
+
+        } else {
+          throw createError.InternalServerError("Failed to send otp code in email");
+        }
+
+      }catch(err){
+
+        if(err.isJoi) return next(createError.BadRequest("Invalid Email"))
+
+          next(err)
+
+
+      }
+
+
+
+
+
+
+
+
+
+
+
+  }
+
+
+
 };
 
 module.exports = AuthController;

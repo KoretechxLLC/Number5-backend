@@ -99,6 +99,10 @@ const UserSchema = new Schema({
   approved_date : {
     type : Date
   },
+  role : {
+    type : String,
+    default : "user"
+  },
   created_at: {
     type: Date,
     default: Date.now,
