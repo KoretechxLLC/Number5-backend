@@ -10,7 +10,7 @@ const verifyAdminRole = async (req, res, next) => {
         let user = await UserModel.findById(userId);
 
         if (!user) {
-            return next(createError.NotFound("User not found"));
+            return next(createError.Unauthorized("Unauthorized"));
         }
 
         if (user.role && user.role.toLowerCase() === "admin") {

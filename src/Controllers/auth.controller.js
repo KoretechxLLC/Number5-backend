@@ -28,7 +28,7 @@ const AuthController = {
       let {
         registration_type,
         couples_type,
-        event_fee,
+        registration_fee,
         gender,
         full_name,
         date_of_birth,
@@ -52,8 +52,7 @@ const AuthController = {
 
       if (
         !registration_type ||
-        !couples_type ||
-        !event_fee ||
+        !registration_fee ||
         !gender ||
         !full_name ||
         !date_of_birth ||
@@ -89,7 +88,7 @@ const AuthController = {
       const user = new UserModel({
         registration_type: result?.registration_type,
         couples_type: result?.couples_type,
-        event_fee: result?.event_fee,
+        registration_fee: result?.registration_fee,
         gender: result?.gender,
         date_of_birth: result?.date_of_birth,
         phone_number: result?.phone_number,
@@ -120,6 +119,7 @@ const AuthController = {
         refreshToken: refreshToken,
       });
     } catch (err) {
+   
       if (err.isJoi === true) {
         next(createError.BadRequest());
         return;
@@ -169,7 +169,7 @@ const AuthController = {
       let dataToSend = {
         registration_type: user?.registration_type,
         couples_type: user?.couples_type,
-        event_fee: user?.event_fee,
+        registration_fee: user?.registration_fee,
         gender: user?.gender,
         full_name: user?.full_name,
         date_of_birth: user?.date_of_birth,
@@ -185,6 +185,8 @@ const AuthController = {
         wanted_experience: user?.wanted_experience,
         user_quality: user?.user_quality,
         user_status: user?.user_status,
+        is_fee_paid: user?.is_fee_paid,
+        profile_pic : user?.profile_pic,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
       };
@@ -214,7 +216,12 @@ const AuthController = {
         throw createError.BadRequest("Required fields are missing");
       }
 
+
+
+
       const result = await approvedUserSchema.validateAsync(req.body);
+      
+      
       let user = await UserModel.findOne({ email: result.email }).session(
         session
       );
@@ -380,7 +387,6 @@ const AuthController = {
         accessToken: accessToken,
       });
     } catch (error) {
-      
       next(error);
     }
   },
