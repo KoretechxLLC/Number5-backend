@@ -49,12 +49,18 @@ const messageSchema = joi.object({
   id: joi.string().required(),
 })
 
+const TermsAndConditionsSchema = joi.object({
+  terms_and_conditions : joi.string().required(),
+  
+})
+
 
 module.exports = {
   authSchema: authSchema,
   loginSchema: loginSchema,
   approvedUserSchema: approvedUserSchema,
   changePasswordSchema: changePasswordSchema,
-  messageSchema : messageSchema
+  messageSchema : messageSchema,
+  TermsAndConditionsSchema : TermsAndConditionsSchema
 
 };
