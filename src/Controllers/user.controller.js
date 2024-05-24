@@ -15,8 +15,6 @@ const UserController = {
 
       let user = await UserModel.findById(id);
 
-      console.log(user, "user");
-
       if (!user || user?.length == 0) {
         throw createError.NotFound("User Not Found");
       }

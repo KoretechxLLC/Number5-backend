@@ -43,9 +43,18 @@ const changePasswordSchema = joi.object({
   confirm_password: joi.ref("password"),
 });
 
+const messageSchema = joi.object({
+  subject : joi.string().min(5).max(100).required(),
+  message : joi.string().min(10).max(500).required(),
+  id: joi.string().required(),
+})
+
+
 module.exports = {
   authSchema: authSchema,
   loginSchema: loginSchema,
   approvedUserSchema: approvedUserSchema,
   changePasswordSchema: changePasswordSchema,
+  messageSchema : messageSchema
+
 };
