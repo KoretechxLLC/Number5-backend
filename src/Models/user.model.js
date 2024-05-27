@@ -10,17 +10,9 @@ const UserSchema = new Schema({
   couples_type: {
     type: String,
   },
-  registration_fee: {
-    type: Number,
-    required: true,
-  },
   profile_pic: {
     type: String,
     required: true,
-  },
-  is_fee_paid: {
-    type: String,
-    default: false,
   },
   gender: {
     type: String,
@@ -98,9 +90,16 @@ const UserSchema = new Schema({
   approved_date: {
     type: Date,
   },
+  account_created_by : {
+    type : String,
+    required : true
+  },
   role: {
     type: String,
     default: "user",
+  },
+  partner_ref : {
+    type : String,
   },
   created_at: {
     type: Date,
