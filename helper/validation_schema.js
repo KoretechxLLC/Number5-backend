@@ -78,6 +78,16 @@ const TermsAndConditionsSchema = joi.object({
   terms_and_conditions: joi.string().required(),
 });
 
+const RegistrationTypeSchema = joi.object({
+  registration_type : joi?.string()?.lowercase()?.required(),
+  couples_type: joi.string().lowercase().when('registration_type', {
+    is: 'couple',
+    then: joi.string().lowercase().required(),
+    otherwise: joi.string().lowercase().optional()
+  }),
+  image_path : joi.string()
+})
+
 module.exports = {
   authSchema: authSchema,
   partnerSchema: partnerSchema,
@@ -86,4 +96,5 @@ module.exports = {
   changePasswordSchema: changePasswordSchema,
   messageSchema: messageSchema,
   TermsAndConditionsSchema: TermsAndConditionsSchema,
+  RegistrationTypeSchema : RegistrationTypeSchema
 };
