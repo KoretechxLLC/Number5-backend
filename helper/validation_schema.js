@@ -88,6 +88,26 @@ const RegistrationTypeSchema = joi.object({
   image_path : joi.string()
 })
 
+
+const EventSchema = joi.object({
+
+  event_name : joi.string().required(),
+  event_start_time : joi.string().required(),
+  event_end_time : joi.string().required(),
+  event_date : joi.date().required(),
+  latitude : joi.number().required(),
+  longitude : joi.number().required(),
+  event_description : joi.string().max(1000).required(),
+  event_sop : joi.string().required(),
+  event_ticket_price : joi.number().required(),
+  event_pic : joi.string().required(),
+  id : joi.string()
+
+
+
+})
+
+
 module.exports = {
   authSchema: authSchema,
   partnerSchema: partnerSchema,
@@ -96,5 +116,6 @@ module.exports = {
   changePasswordSchema: changePasswordSchema,
   messageSchema: messageSchema,
   TermsAndConditionsSchema: TermsAndConditionsSchema,
-  RegistrationTypeSchema : RegistrationTypeSchema
+  RegistrationTypeSchema : RegistrationTypeSchema,
+  EventSchema : EventSchema
 };

@@ -116,21 +116,7 @@ const RegistrationTypeController = {
         throw createError.NotFound("Registration Type Not Found");
       }
 
-      let oldPic = registration.image_path;
-
-      if (filename) {
-        const destinationFolder = path.join(
-          __dirname,
-          `../../registrationImages/${oldPic}`
-        );
-
-        fs.unlink(destinationFolder, (err) => {
-          if (err) {
-            console.error("error deleting picture");
-          }
-        });
-      }
-
+  
       const updatedRegistrationType =
         await RegistrationTypeModel.findByIdAndUpdate(
           id,
@@ -144,6 +130,23 @@ const RegistrationTypeController = {
         throw createError.InternalServerError(
           "Failed to update registration type"
         );
+
+        
+        let oldPic = registration.image_path;
+
+        if (filename) {
+          const destinationFolder = path.join(
+            __dirname,
+            `../../registrationImages/${oldPic}`
+          );
+  
+          fs.unlink(destinationFolder, (err) => {
+            if (err) {
+              console.error("error deleting picture");
+            }
+          });
+        }
+      
 
       res.status(200).json({
         message: "Registration type updated successfully",
