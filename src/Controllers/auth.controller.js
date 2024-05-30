@@ -486,7 +486,15 @@ const AuthController = {
       let user = await UserModel.findOne({ email: email });
 
       if (!user || user.length == 0)
-        throw createError.NotFound("User not found");
+        return next(createError.NotFound("User not found"));
+
+      if (!user?.user_status || user?.user_status?.toLowerCase() == "pending" ) {
+        return next(
+          createError.NotFound(
+            "Approval pending. Password unchanged."
+          )
+        );
+      }
 
       let otp = await generateOTP();
 
@@ -524,7 +532,7 @@ const AuthController = {
       let user = await UserModel.findOne({ email: email });
 
       if (!user || user.length === 0) {
-        throw createError.NotFound("User not found");
+        return next(createError.NotFound("User not found"));
       }
 
       user.password = password;
