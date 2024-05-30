@@ -92,7 +92,6 @@ const UserSchema = new Schema({
   },
   account_created_by : {
     type : String,
-    required : true
   },
   role: {
     type: String,
