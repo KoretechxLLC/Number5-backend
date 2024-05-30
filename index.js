@@ -4,17 +4,25 @@ const protectedRoutes = require("./src/Routes/ProtectedRoutes/ProtectedRoutes")
 const authRoutes = require("./src/Routes/AuthRoutes/authRoutes")
 const createError = require("http-errors")
 const morgan = require("morgan")
+const path = require("path")
 require("./helper/mongodb_init")
 
 
 const PORT = process.env.Port || 5000
-
+    
 const app = express()
 
 
 app.use(morgan('dev'))
 app.use(cors())
-app.use(express.static('public'))
+
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/registrationImages', express.static(path.join(__dirname, 'public', 'registrationImages')));
+app.use('/eventImages', express.static(path.join(__dirname, 'public', 'eventImages')));
+app.use('/profileImages', express.static(path.join(__dirname, 'public', 'profileImages')));
+
+
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
