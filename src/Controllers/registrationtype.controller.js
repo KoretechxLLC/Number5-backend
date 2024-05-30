@@ -49,7 +49,7 @@ const RegistrationTypeController = {
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
-          `../../registrationImages/${filename}`
+          `../../public/registrationImages/${filename}`
         );
         fs.unlink(destinationFolder, (err) => {
           if (err) {
@@ -116,7 +116,6 @@ const RegistrationTypeController = {
         throw createError.NotFound("Registration Type Not Found");
       }
 
-  
       const updatedRegistrationType =
         await RegistrationTypeModel.findByIdAndUpdate(
           id,
@@ -131,22 +130,20 @@ const RegistrationTypeController = {
           "Failed to update registration type"
         );
 
-        
-        let oldPic = registration.image_path;
+      let oldPic = registration.image_path;
 
-        if (filename) {
-          const destinationFolder = path.join(
-            __dirname,
-            `../../registrationImages/${oldPic}`
-          );
-  
-          fs.unlink(destinationFolder, (err) => {
-            if (err) {
-              console.error("error deleting picture");
-            }
-          });
-        }
-      
+      if (filename) {
+        const destinationFolder = path.join(
+          __dirname,
+          `../../public/registrationImages/${oldPic}`
+        );
+
+        fs.unlink(destinationFolder, (err) => {
+          if (err) {
+            console.error("error deleting picture");
+          }
+        });
+      }
 
       res.status(200).json({
         message: "Registration type updated successfully",
@@ -158,7 +155,7 @@ const RegistrationTypeController = {
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
-          `../../registrationImages/${filename}`
+          `../../public/registrationImages/${filename}`
         );
         fs.unlink(destinationFolder, (err) => {
           if (err) {
@@ -183,11 +180,10 @@ const RegistrationTypeController = {
       if (!deletedType)
         throw createError.NotFound("Registration type not found");
 
-
       if (deletedType?.image_path) {
         const destinationFolder = path.join(
           __dirname,
-          `../../registrationImages/${deletedType?.image_path}`
+          `../../public/registrationImages/${deletedType?.image_path}`
         );
         fs.unlink(destinationFolder, (err) => {
           if (err) {
@@ -195,7 +191,6 @@ const RegistrationTypeController = {
           }
         });
       }
-
 
       res.status(200).json({
         message: "Successfully deleted registration type",

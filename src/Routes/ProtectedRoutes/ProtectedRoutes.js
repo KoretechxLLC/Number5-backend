@@ -38,8 +38,6 @@ router.post(
 
 router.get(
   "/get-registration-type",
-  verifyAccessToken,
-  verifyAdminRole,
   RegistrationTypeController.get
 );
 

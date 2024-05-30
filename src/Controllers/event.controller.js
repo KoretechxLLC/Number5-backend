@@ -66,7 +66,7 @@ const EventController = {
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
-          `../../eventImages/${filename}`
+          `../../public/eventImages/${filename}`
         );
         fs.unlink(destinationFolder, (err) => {
           if (err) {
@@ -194,7 +194,7 @@ const EventController = {
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
-          `../../eventImages/${oldPic}`
+          `../../public/eventImages/${oldPic}`
         );
 
         fs.unlink(destinationFolder, (err) => {
@@ -214,7 +214,7 @@ const EventController = {
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
-          `../../eventImages/${filename}`
+          `../../public/eventImages/${filename}`
         );
         fs.unlink(destinationFolder, (err) => {
           if (err) {
@@ -243,7 +243,7 @@ const EventController = {
       if (event.event_pic) {
         const destinationFolder = path.join(
           __dirname,
-          `../../eventImages/${event.event_pic}`
+          `../../public/eventImages/${event.event_pic}`
         );
         fs.unlink(destinationFolder, (err) => {
           if (err) {

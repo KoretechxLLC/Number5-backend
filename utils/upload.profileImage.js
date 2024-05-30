@@ -3,7 +3,7 @@ const path = require("path")
 const fs = require("fs")
 
 
-const destinationFolder = path.join(__dirname, '../profileImages/');
+const destinationFolder = path.join(__dirname, '../public/profileImages/');
 if (!fs.existsSync(destinationFolder)) {
     fs.mkdirSync(destinationFolder, { recursive: true });
 }
@@ -13,8 +13,9 @@ var storage = multer.diskStorage({
         cb(null, destinationFolder);
     },
     filename: function (req, file, cb) {
-        
-        
+
+        console.log(file,"filee")
+       
         cb(null, Math.random() * 9999 + 9999 + '.' + file.originalname.split('.').pop());
         
     }

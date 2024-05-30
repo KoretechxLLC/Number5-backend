@@ -79,7 +79,7 @@ const UserController = {
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
-          `../../profileImages/${oldProfilePicFilename}`
+          `../../public/profileImages/${oldProfilePicFilename}`
         );
 
         fs.unlink(destinationFolder, (err) => {
@@ -105,6 +105,20 @@ const UserController = {
         data: dataToSend,
       });
     } catch (err) {
+
+      if (filename) {
+        const destinationFolder = path.join(
+          __dirname,
+          `../../public/profileImages/${filename}`
+        );
+
+        fs.unlink(destinationFolder, (err) => {
+          if (err) {
+            console.error("error deleting picture");
+          }
+        });
+      }
+
         
       if (err.isJoi) return next(createError.BadRequest());
 

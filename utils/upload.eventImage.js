@@ -3,7 +3,7 @@ const path = require("path")
 const fs = require("fs")
 
 
-const destinationFolder = path.join(__dirname, '../eventImages/');
+const destinationFolder = path.join(__dirname, '../public/eventImages/');
 if (!fs.existsSync(destinationFolder)) {
     fs.mkdirSync(destinationFolder, { recursive: true });
 }
