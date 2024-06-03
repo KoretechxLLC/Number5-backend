@@ -12,7 +12,7 @@ const EventController = require("../../Controllers/event.controller");
 
 const router = express.Router();
 
-router.get("/get-user-data/:id", verifyAccessToken, UserController.get);
+router.get("/get-user-data", verifyAccessToken, UserController.get);
 
 router.put(
   "/edit-user-data",

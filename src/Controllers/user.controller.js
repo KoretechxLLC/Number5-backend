@@ -10,7 +10,9 @@ const fs = require("fs");
 const UserController = {
   get: async (req, res, next) => {
     try {
-      const { id } = req.params;
+
+      const payload = req.payload;
+      const id = payload.aud;
 
       if (!id) {
         throw createError.BadRequest();
