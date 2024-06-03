@@ -1,6 +1,9 @@
 const createError = require("http-errors");
 const UserModel = require("../Models/user.model");
-const { authSchema } = require("../../helper/validation_schema");
+const {
+  authSchema,
+  updateUserSchema,
+} = require("../../helper/validation_schema");
 const path = require("path");
 const fs = require("fs");
 
@@ -53,11 +56,12 @@ const UserController = {
     }
   },
   put: async (req, res, next) => {
+    let filename = req?.file?.filename;
+
     try {
       const userData = req.body;
-      const { id } = userData;
 
-      let filename = req?.file?.filename;
+      const { id } = userData;
 
       if (filename) {
         userData.profile_pic = filename;
@@ -66,13 +70,17 @@ const UserController = {
         throw createError.BadRequest("Required fields are missing");
       }
 
-      await authSchema.validateAsync(userData);
-
       const user = await UserModel.findById(id);
 
       if (!user) {
         throw createError.NotFound("User Not Found");
       }
+
+      if (!filename) {
+        userData.profile_pic = user?.profile_pic;
+      }
+
+      let result = await updateUserSchema.validateAsync(userData);
 
       let oldProfilePicFilename = user.profile_pic;
 
@@ -89,7 +97,7 @@ const UserController = {
         });
       }
 
-      const updatedUser = await UserModel.findByIdAndUpdate(id, userData, {
+      const updatedUser = await UserModel.findByIdAndUpdate(id, result, {
         new: true,
       });
 
@@ -100,12 +108,16 @@ const UserController = {
       let dataToSend = { ...updatedUser._doc };
       delete dataToSend.password;
 
+      dataToSend.id = dataToSend?._id;
+
+      delete dataToSend._id;
+
       res.status(200).json({
         message: "User updated successfully",
         data: dataToSend,
       });
     } catch (err) {
-
+      console.log(err, "errr");
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
@@ -119,7 +131,6 @@ const UserController = {
         });
       }
 
-        
       if (err.isJoi) return next(createError.BadRequest());
 
       next(err);

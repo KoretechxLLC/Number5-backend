@@ -19,7 +19,7 @@ authRoutes.post("/login", AuthController.login);
 
 authRoutes.post("/refresh-token", AuthController.refreshToken);
 
-authRoutes.delete("/sign-out", AuthController.signout);
+authRoutes.delete("/sign-out/:token", AuthController.signout);
 
 authRoutes.put(
   "/approved-user",
