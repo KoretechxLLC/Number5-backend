@@ -15,8 +15,8 @@ const router = express.Router();
 router.get("/get-user-data/:id", verifyAccessToken, UserController.get);
 
 router.put(
-  "/edit-user-data/",
-  verifyAccessToken,
+  "/edit-user-data",
+  // verifyAccessToken,
   uploadProfileImage.single("profileImage"),
   UserController.put
 );
@@ -39,6 +39,7 @@ router.post(
 router.get(
   "/get-registration-type",
   RegistrationTypeController.get
+
 );
 
 router.put(

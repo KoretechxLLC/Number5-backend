@@ -27,6 +27,31 @@ const authSchema = joi.object({
   })
 });
 
+
+const updateUserSchema = joi.object({
+  registration_type: joi.string()?.lowercase().required(),
+  couples_type: joi.string().lowercase(),
+  profile_pic: joi.string().required(),
+  gender: joi.string().required(),
+  date_of_birth: joi.string(),
+  phone_number: joi.string().regex( /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/),
+  full_name: joi.string().required(),
+  address: joi?.string().required(),
+  occupation: joi?.string().required(),
+  height: joi?.number().required(),
+  weight: joi?.number().required(),
+  sexuality: joi.string().required(),
+  life_style: joi.string().required(),
+  wanted_experience: joi.string().required(),
+  user_quality: joi.string().required(),
+  is_agree_terms_and_conditions: joi.boolean().required(),
+  user_status: joi.string(),
+  id: joi.string().required(),
+  email: joi.string().email().lowercase().required(),
+  
+});
+
+
 const partnerSchema = joi.object({
   registration_type: joi.string()?.lowercase().required(),
   couples_type: joi.string().lowercase().required(),
@@ -113,6 +138,7 @@ module.exports = {
   partnerSchema: partnerSchema,
   loginSchema: loginSchema,
   approvedUserSchema: approvedUserSchema,
+  updateUserSchema : updateUserSchema,
   changePasswordSchema: changePasswordSchema,
   messageSchema: messageSchema,
   TermsAndConditionsSchema: TermsAndConditionsSchema,

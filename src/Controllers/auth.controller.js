@@ -342,7 +342,6 @@ const AuthController = {
       let dataToSend = {
         registration_type: user?.registration_type,
         couples_type: user?.couples_type,
-        registration_fee: user?.registration_fee,
         gender: user?.gender,
         full_name: user?.full_name,
         date_of_birth: user?.date_of_birth,
@@ -358,8 +357,9 @@ const AuthController = {
         wanted_experience: user?.wanted_experience,
         user_quality: user?.user_quality,
         user_status: user?.user_status,
-        is_fee_paid: user?.is_fee_paid,
         profile_pic: user?.profile_pic,
+        username: user?.username,
+        membership_id: user?.membership_id,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
       };
@@ -488,11 +488,9 @@ const AuthController = {
       if (!user || user.length == 0)
         return next(createError.NotFound("User not found"));
 
-      if (!user?.user_status || user?.user_status?.toLowerCase() == "pending" ) {
+      if (!user?.user_status || user?.user_status?.toLowerCase() == "pending") {
         return next(
-          createError.NotFound(
-            "Approval pending. Password unchanged."
-          )
+          createError.NotFound("Approval pending. Password unchanged.")
         );
       }
 
@@ -552,6 +550,9 @@ const AuthController = {
     try {
       let { refreshToken } = req.body;
 
+      console.log(refreshToken,"token")
+
+
       if (!refreshToken) {
         throw createError.BadRequest("Unauthorized");
       }
@@ -568,17 +569,17 @@ const AuthController = {
     }
   },
   signout: async (req, res, next) => {
-    const { refreshToken } = req.body;
+    const token = req.params.token;
 
     try {
-      if (!refreshToken) throw createError.Unauthorized();
+      if (!token) throw createError.Unauthorized();
 
-      const userId = await verifyRefreshToken(refreshToken);
+      const userId = await verifyRefreshToken(token);
 
       let value = await client.DEL(userId);
 
       res.status(204).json({
-        message: "logout successful",
+        message: "Successfully Logged Out",
         data: {},
       });
     } catch (error) {

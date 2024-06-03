@@ -13,8 +13,6 @@ var storage = multer.diskStorage({
         cb(null, destinationFolder);
     },
     filename: function (req, file, cb) {
-
-        console.log(file,"filee")
        
         cb(null, Math.random() * 9999 + 9999 + '.' + file.originalname.split('.').pop());
         
