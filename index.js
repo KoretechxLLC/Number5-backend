@@ -12,7 +12,6 @@ const PORT = process.env.Port || 5000
     
 const app = express()
 
-
 app.use(morgan('dev'))
 app.use(cors())
 

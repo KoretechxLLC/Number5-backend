@@ -75,15 +75,19 @@ router.delete(
 router.get(
   "/get-upcoming-events",
   verifyAccessToken,
-  verifyAdminRole,
   EventController.getUpcomingEvents
 );
 
 router.get(
   "/get-events/:page/:size",
   verifyAccessToken,
-  verifyAdminRole,
   EventController.getEvents
+);
+
+router.get(
+  "/get-today-event",
+  verifyAccessToken,
+  EventController.getTodayEvent
 );
 
 router.put(

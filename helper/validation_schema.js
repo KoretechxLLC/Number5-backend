@@ -6,7 +6,11 @@ const authSchema = joi.object({
   profile_pic: joi.string().required(),
   gender: joi.string().required(),
   date_of_birth: joi.string(),
-  phone_number: joi.string().regex( /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/),
+  phone_number: joi
+    .string()
+    .regex(
+      /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/
+    ),
   full_name: joi.string().required(),
   address: joi?.string().required(),
   occupation: joi?.string().required(),
@@ -20,13 +24,12 @@ const authSchema = joi.object({
   user_status: joi.string(),
   id: joi.string(),
   email: joi.string().email().lowercase().required(),
-  partner_details: joi.when('registration_type', {
-    is: joi.string().valid('couples'),
+  partner_details: joi.when("registration_type", {
+    is: joi.string().valid("couples"),
     then: joi.object().required(),
-    otherwise: joi.object()
-  })
+    otherwise: joi.object(),
+  }),
 });
-
 
 const updateUserSchema = joi.object({
   registration_type: joi.string()?.lowercase().required(),
@@ -34,7 +37,11 @@ const updateUserSchema = joi.object({
   profile_pic: joi.string().required(),
   gender: joi.string().required(),
   date_of_birth: joi.string(),
-  phone_number: joi.string().regex( /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/),
+  phone_number: joi
+    .string()
+    .regex(
+      /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/
+    ),
   full_name: joi.string().required(),
   address: joi?.string().required(),
   occupation: joi?.string().required(),
@@ -48,9 +55,7 @@ const updateUserSchema = joi.object({
   user_status: joi.string(),
   id: joi.string().required(),
   email: joi.string().email().lowercase().required(),
-  
 });
-
 
 const partnerSchema = joi.object({
   registration_type: joi.string()?.lowercase().required(),
@@ -58,7 +63,11 @@ const partnerSchema = joi.object({
   profile_pic: joi.string().required(),
   gender: joi.string().required(),
   date_of_birth: joi.string(),
-  phone_number: joi.string().regex(/^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/),
+  phone_number: joi
+    .string()
+    .regex(
+      /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/
+    ),
   full_name: joi.string().required(),
   address: joi?.string().required(),
   occupation: joi?.string().required(),
@@ -104,44 +113,38 @@ const TermsAndConditionsSchema = joi.object({
 });
 
 const RegistrationTypeSchema = joi.object({
-  registration_type : joi?.string()?.lowercase()?.required(),
-  couples_type: joi.string().lowercase().when('registration_type', {
-    is: 'couple',
+  registration_type: joi?.string()?.lowercase()?.required(),
+  couples_type: joi.string().lowercase().when("registration_type", {
+    is: "couple",
     then: joi.string().lowercase().required(),
-    otherwise: joi.string().lowercase().optional()
+    otherwise: joi.string().lowercase().optional(),
   }),
-  image_path : joi.string()
-})
-
+  image_path: joi.string(),
+});
 
 const EventSchema = joi.object({
-
-  event_name : joi.string().required(),
-  event_start_time : joi.string().required(),
-  event_end_time : joi.string().required(),
-  event_date : joi.date().required(),
-  latitude : joi.number().required(),
-  longitude : joi.number().required(),
-  event_description : joi.string().max(1000).required(),
-  event_sop : joi.string().required(),
-  event_ticket_price : joi.number().required(),
-  event_pic : joi.string().required(),
-  id : joi.string()
-
-
-
-})
-
+  event_name: joi.string().required(),
+  event_start_time: joi.string().required(),
+  event_end_time: joi.string().required(),
+  event_date: joi.date().required(),
+  latitude: joi.number().required(),
+  longitude: joi.number().required(),
+  event_description: joi.string().max(1000).required(),
+  event_sop: joi.array().required(),
+  event_ticket_price: joi.number().required(),
+  event_pic: joi.string().required(),
+  id: joi.string(),
+});
 
 module.exports = {
   authSchema: authSchema,
   partnerSchema: partnerSchema,
   loginSchema: loginSchema,
   approvedUserSchema: approvedUserSchema,
-  updateUserSchema : updateUserSchema,
+  updateUserSchema: updateUserSchema,
   changePasswordSchema: changePasswordSchema,
   messageSchema: messageSchema,
   TermsAndConditionsSchema: TermsAndConditionsSchema,
-  RegistrationTypeSchema : RegistrationTypeSchema,
-  EventSchema : EventSchema
+  RegistrationTypeSchema: RegistrationTypeSchema,
+  EventSchema: EventSchema,
 };

@@ -3,6 +3,7 @@ const { EventSchema } = require("../../helper/validation_schema");
 const EventModel = require("../Models/event.model");
 const path = require("path");
 const fs = require("fs");
+const QRCode = require("qrcode");
 
 const EventController = {
   createEvent: async (req, res, next) => {
@@ -41,16 +42,52 @@ const EventController = {
 
       const eventDate = new Date(event_date);
 
-      const currentDate = new Date();
+      let currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+
       if (eventDate < currentDate) {
         throw createError.BadRequest("Event date cannot be in the past");
       }
+
+      let eventExists = await EventModel.findOne({ event_name: event_name });
+
+      if (eventExists) throw createError.Conflict("Event Name already exists");
 
       eventData.event_date = eventDate;
 
       eventData.event_pic = filename;
 
       let result = await EventSchema.validateAsync(eventData);
+
+      const eventDetailsString = JSON.stringify(result);
+
+      const destinationFolder = path.join(
+        __dirname,
+        "../../public/eventQrImages/"
+      );
+      const filePath = path.join(destinationFolder, `${result.event_name}.png`);
+
+      if (!fs.existsSync(destinationFolder)) {
+        fs.mkdirSync(destinationFolder);
+      }
+
+      QRCode.toFile(
+        filePath,
+        eventDetailsString,
+        {
+          color: {
+            dark: "#000000",
+            light: "#FFFFFF",
+          },
+        },
+        function (err) {
+          if (err) {
+            throw createError.InternalServerError("Failed to create qr image");
+          }
+        }
+      );
+
+      result.qrimage_path = `${result?.event_name}.png`;
 
       let newEvent = new EventModel(result);
 
@@ -85,13 +122,44 @@ const EventController = {
       let currentDate = new Date();
       currentDate.setHours(0, 0, 0, 0);
 
-      let events = await EventModel.find({ event_date: { $gte: currentDate } });
+      let oneWeekLater = new Date(currentDate);
+      oneWeekLater.setDate(currentDate.getDate() + 7);
+
+      let events = await EventModel.find({
+        event_date: {
+          $gte: currentDate,
+          $lt: oneWeekLater,
+        },
+      });
 
       if (!events || events?.length == 0)
         throw createError.NotFound("Events not found");
 
       res.status(200).json({
         message: "Retrieved Events Successfully",
+        data: events,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  getTodayEvent: async (req, res, next) => {
+    try {
+      let currentDate = new Date();
+      const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(currentDate.setHours(23, 59, 59, 999));
+
+      let events = await EventModel.find({
+        event_date: {
+          $gte: startOfDay,
+          $lt: endOfDay,
+        },
+      });
+      if (!events || events?.length == 0)
+        throw createError.NotFound("Events not found");
+
+      res.status(200).json({
+        message: "Retrieved Today Events Successfully",
         data: events,
       });
     } catch (err) {
@@ -163,6 +231,13 @@ const EventController = {
 
       if (!event) throw createError.NotFound("Event Not Found");
 
+      let eventExists = await EventModel.findOne({
+        event_name: event_name,
+        _id: { $ne: id },
+      });
+
+      if (eventExists) throw createError.Conflict("Event Name already exists");
+
       const eventDate = new Date(event_date);
 
       const currentDate = new Date();
@@ -181,6 +256,48 @@ const EventController = {
       }
 
       let result = await EventSchema.validateAsync(eventData);
+
+      const eventDetailsString = JSON.stringify(result);
+
+      const destinationFolder = path.join(
+        __dirname,
+        "../../public/eventQrImages/"
+      );
+      const filePath = path.join(destinationFolder, `${result.event_name}.png`);
+
+      if (!fs.existsSync(destinationFolder)) {
+        fs.mkdirSync(destinationFolder);
+      }
+
+      QRCode.toFile(
+        filePath,
+        eventDetailsString,
+        {
+          color: {
+            dark: "#000000",
+            light: "#FFFFFF",
+          },
+        },
+        function (err) {
+          if (err) {
+            throw createError.InternalServerError("Failed to create qr image");
+          }
+        }
+      );
+
+      if (event.event_name !== event_name) {
+        const destinationFolder = path.join(
+          __dirname,
+          `../../public/eventQrImages/${event.qrimage_path}`
+        );
+        fs.unlink(destinationFolder, (err) => {
+          if (err) {
+            console.error("Error deleting picture:", err);
+          }
+        });
+      }
+
+      result.qrimage_path = `${result?.event_name}.png`;
 
       let oldPic = event.event_pic;
 
@@ -244,6 +361,18 @@ const EventController = {
         const destinationFolder = path.join(
           __dirname,
           `../../public/eventImages/${event.event_pic}`
+        );
+        fs.unlink(destinationFolder, (err) => {
+          if (err) {
+            console.error("Error deleting picture:", err);
+          }
+        });
+      }
+
+      if (event.qrimage_path) {
+        const destinationFolder = path.join(
+          __dirname,
+          `../../public/eventQrImages/${event.qrimage_path}`
         );
         fs.unlink(destinationFolder, (err) => {
           if (err) {
