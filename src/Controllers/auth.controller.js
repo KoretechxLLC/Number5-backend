@@ -38,8 +38,6 @@ const AuthController = {
     try {
       let userData = req.body;
 
-      console.log(userData, "userData");
-
       let {
         registration_type,
         couples_type,
@@ -265,7 +263,6 @@ const AuthController = {
         refreshToken: refreshToken,
       });
     } catch (err) {
-      console.log(err, "errr");
       await session.abortTransaction();
       session.endSession();
 
@@ -549,9 +546,6 @@ const AuthController = {
   refreshToken: async (req, res, next) => {
     try {
       let { refreshToken } = req.body;
-
-      console.log(refreshToken,"token")
-
 
       if (!refreshToken) {
         throw createError.BadRequest("Unauthorized");

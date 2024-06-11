@@ -119,7 +119,6 @@ const UserController = {
         data: dataToSend,
       });
     } catch (err) {
-      console.log(err, "errr");
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
