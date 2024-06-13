@@ -121,20 +121,20 @@ const EventController = {
     try {
       let currentDate = new Date();
       currentDate.setHours(0, 0, 0, 0);
-
-      let oneWeekLater = new Date(currentDate);
-      oneWeekLater.setDate(currentDate.getDate() + 7);
-
+  
+      let tomorrow = new Date(currentDate);
+      tomorrow.setDate(currentDate.getDate() + 1);
+  
       let events = await EventModel.find({
         event_date: {
-          $gte: currentDate,
-          $lt: oneWeekLater,
+          $gte: tomorrow,
         },
       });
-
-      if (!events || events?.length == 0)
+  
+      if (!events || events.length === 0) {
         throw createError.NotFound("Events not found");
-
+      }
+      
       res.status(200).json({
         message: "Retrieved Events Successfully",
         data: events,
@@ -143,6 +143,7 @@ const EventController = {
       next(err);
     }
   },
+  
   getTodayEvent: async (req, res, next) => {
     try {
       let currentDate = new Date();

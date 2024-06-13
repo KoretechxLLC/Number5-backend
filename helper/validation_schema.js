@@ -136,6 +136,25 @@ const EventSchema = joi.object({
   id: joi.string(),
 });
 
+const MembershipSchema = joi.object({
+  package_name: joi.string().required(),
+  duration_type: joi.string().required(),
+  badge_image_path: joi.string().required(),
+  benefits: joi.array().required(),
+  booking_type: joi.array().min(1).required(),
+  scope: joi.array(),
+  gender_type: joi.array().required(),
+  additional_details: joi.string(),
+  scope_heading: joi.string(),
+  male_membership_amount: joi.number().required(),
+  female_membership_amount: joi.number().required(),
+  couple_membership_amount: joi.number().required(),
+  total_passes: joi.number(),
+  default_membership: joi.boolean(),
+  total_guests_allowed: joi.number(),
+  id: joi.string(),
+});
+
 module.exports = {
   authSchema: authSchema,
   partnerSchema: partnerSchema,
@@ -147,4 +166,5 @@ module.exports = {
   TermsAndConditionsSchema: TermsAndConditionsSchema,
   RegistrationTypeSchema: RegistrationTypeSchema,
   EventSchema: EventSchema,
+  MembershipSchema: MembershipSchema,
 };

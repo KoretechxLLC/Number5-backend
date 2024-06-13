@@ -20,6 +20,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/registrationImages', express.static(path.join(__dirname, 'public', 'registrationImages')));
 app.use('/eventImages', express.static(path.join(__dirname, 'public', 'eventImages')));
 app.use('/profileImages', express.static(path.join(__dirname, 'public', 'profileImages')));
+app.use('/eventQrImages', express.static(path.join(__dirname, 'public', 'eventQrImages')));
+
 
 
 
