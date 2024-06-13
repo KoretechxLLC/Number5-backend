@@ -23,6 +23,7 @@ const authSchema = joi.object({
   is_agree_terms_and_conditions: joi.boolean().required(),
   user_status: joi.string(),
   id: joi.string(),
+  membership : joi.object(),
   email: joi.string().email().lowercase().required(),
   partner_details: joi.when("registration_type", {
     is: joi.string().valid("couples"),
@@ -73,6 +74,7 @@ const partnerSchema = joi.object({
   occupation: joi?.string().required(),
   height: joi?.number().required(),
   weight: joi?.number().required(),
+  membership : joi?.object(),
   sexuality: joi.string().required(),
   life_style: joi.string().required(),
   wanted_experience: joi.string().required(),
@@ -146,12 +148,12 @@ const MembershipSchema = joi.object({
   gender_type: joi.array().required(),
   additional_details: joi.string(),
   scope_heading: joi.string(),
-  male_membership_amount: joi.number().required(),
-  female_membership_amount: joi.number().required(),
+  single_membership_amount: joi.number().required(),
   couple_membership_amount: joi.number().required(),
   total_passes: joi.number(),
   default_membership: joi.boolean(),
   total_guests_allowed: joi.number(),
+
   id: joi.string(),
 });
 

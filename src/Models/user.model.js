@@ -81,6 +81,9 @@ const UserSchema = new Schema({
   membership_id: {
     type: String,
   },
+  membership : {
+    type : {},
+  },
   username: {
     type: String,
   },
@@ -96,6 +99,9 @@ const UserSchema = new Schema({
   role: {
     type: String,
     default: "user",
+  },
+  card_number : {
+    type : Number,
   },
   partner_ref : {
     type : String,
