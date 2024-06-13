@@ -18,8 +18,7 @@ const MembershipController = {
         gender_type,
         additional_details,
         scope_heading,
-        male_membership_amount,
-        female_membership_amount,
+        single_membership_amount,
         couple_membership_amount,
         booking_type,
         default_membership,
@@ -103,8 +102,7 @@ const MembershipController = {
         gender_type,
         additional_details,
         scope_heading,
-        male_membership_amount,
-        female_membership_amount,
+        single_membership_amount,
         couple_membership_amount,
         badge_image_path,
         booking_type,
@@ -114,16 +112,20 @@ const MembershipController = {
         id,
       } = membershipData;
 
-      if (
-        !package_name ||
-        !duration_type ||
-        !benefits ||
-        benefits.length == 0 ||
-        !booking_type ||
-        booking_type.length == 0 ||
-        !gender_type
-      )
+      if (!package_name || !duration_type || !gender_type)
         throw createError.BadRequest("Required fields are missing");
+
+      if (membershipData?.gender_type) {
+        membershipData.gender_type = JSON.parse(membershipData.gender_type);
+      }
+
+      if (membershipData?.benefits) {
+        membershipData.benefits = JSON.parse(membershipData.benefits);
+      }
+
+      if (membershipData?.scope) {
+        membershipData.scope = JSON.parse(membershipData.scope);
+      }
 
       if (!id) throw createError.BadRequest("User Id is missing");
 

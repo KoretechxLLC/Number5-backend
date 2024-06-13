@@ -17,12 +17,14 @@ const {
   generateMembershipID,
   generateUsername,
   generateOTP,
+  generateCardNumber,
 } = require("../../helper/generate_random_passwords");
 const mongoose = require("mongoose");
 const { sendEmail } = require("../../helper/send_email");
 const client = require("../../helper/redis_init");
 const path = require("path");
 const fs = require("fs");
+const MembershipModel = require("../Models/membership.model");
 
 const AuthController = {
   registerUser: async (req, res, next) => {
@@ -91,6 +93,14 @@ const AuthController = {
       userData.profile_pic = profileImageName;
 
       userData.phone_number = userData?.phone_number?.split(" ").join("");
+
+      let default_membership = await MembershipModel.findOne({
+        default_membership: true,
+      });
+
+      userData.membership = default_membership;
+
+      console.log(userData, "userDta");
 
       let result = await authSchema.validateAsync(userData);
 
@@ -165,6 +175,7 @@ const AuthController = {
           ?.split(" ")
           .join("");
 
+        partner_details.membership = default_membership;
         let partnerData = await partnerSchema.validateAsync(partner_details);
 
         const existingPartnerUser = await UserModel.findOne({
@@ -196,6 +207,7 @@ const AuthController = {
           profile_pic: partnerImageName,
           is_agree_terms_and_conditions:
             partnerData?.is_agree_terms_and_conditions,
+          membership: partner_details?.membership,
           full_name: partnerData.full_name,
           email: partnerData.email,
           account_created_by: result?.email,
@@ -220,6 +232,7 @@ const AuthController = {
         life_style: result?.life_style,
         wanted_experience: result?.wanted_experience,
         user_quality: result?.user_quality,
+        membership: result?.membership,
         profile_pic: profileImageName,
         is_agree_terms_and_conditions: result?.is_agree_terms_and_conditions,
         full_name: result.full_name,
@@ -356,6 +369,8 @@ const AuthController = {
         user_status: user?.user_status,
         profile_pic: user?.profile_pic,
         username: user?.username,
+        membership: user?.membership,
+        card_number: user?.card_number,
         membership_id: user?.membership_id,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
@@ -401,12 +416,14 @@ const AuthController = {
       }
 
       const password = await generateRandomPassword(15);
-      const membership_id = await generateMembershipID(25);
+      const membership_id = await generateMembershipID(15);
       const username = await generateUsername(user);
+      const cardNumber = await generateCardNumber();
 
       user.membership_id = membership_id;
       user.password = password;
       user.username = username;
+      user.card_number = cardNumber;
       user.user_status = "approved";
       user.approved_date = new Date();
 
@@ -427,6 +444,12 @@ const AuthController = {
       <br/>
     
       membership id: ${membership_id}
+
+      
+      <br/>
+
+      card number: ${cardNumber}
+      
       `;
 
       const mailInfo = await sendEmail(user.email, subject, message);

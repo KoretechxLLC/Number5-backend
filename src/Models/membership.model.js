@@ -32,11 +32,7 @@ const membershipSchema = new mongoose.Schema({
   scope_heading: {
     type: String,
   },
-  male_membership_amount: {
-    type: Number,
-    required: true,
-  },
-  female_membership_amount: {
+  single_membership_amount: {
     type: Number,
     required: true,
   },
