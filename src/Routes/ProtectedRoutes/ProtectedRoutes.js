@@ -9,6 +9,8 @@ const uploadRegistrationImage = require("../../../utils/upload.registrationImage
 const RegistrationTypeController = require("../../Controllers/registrationtype.controller");
 const uploadEventImage = require("../../../utils/upload.eventImage");
 const EventController = require("../../Controllers/event.controller");
+const MembershipController = require("../../Controllers/membership.controller");
+const uploadBadgeImage = require("../../../utils/upload.badgeImage");
 
 const router = express.Router();
 
@@ -36,11 +38,7 @@ router.post(
   RegistrationTypeController.createType
 );
 
-router.get(
-  "/get-registration-type",
-  RegistrationTypeController.get
-
-);
+router.get("/get-registration-type", RegistrationTypeController.get);
 
 router.put(
   "/update-registration-type",
@@ -96,6 +94,24 @@ router.put(
   verifyAdminRole,
   uploadEventImage.single("eventImage"),
   EventController.updateEvent
+);
+
+router.post(
+  "/add-membership",
+  verifyAccessToken,
+  verifyAdminRole,
+  uploadBadgeImage.single("badgeImage"),
+  MembershipController.add_membersip
+);
+
+router.get("/get-membership", verifyAccessToken, MembershipController.get);
+
+router.put(
+  "/update-membership",
+  verifyAccessToken,
+  verifyAdminRole,
+  uploadBadgeImage.single("badgeImage"),
+  MembershipController.update_membersip
 );
 
 module.exports = router;
