@@ -112,7 +112,7 @@ const MembershipController = {
         id,
       } = membershipData;
 
-      if (!package_name || !duration_type || !gender_type)
+      if (!package_name || !duration_type)
         throw createError.BadRequest("Required fields are missing");
 
       if (membershipData?.gender_type) {

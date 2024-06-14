@@ -1,3 +1,4 @@
+const { number } = require("joi");
 const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
@@ -36,15 +37,30 @@ const membershipSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  consumedPasses: {
+    type: Number,
+  },
+  guestAttended: {
+    type: Number,
+  },
+  remainingVisits: {
+    type: Number,
+  },
+  purchase_date: {
+    type: Date,
+  },
+  expiry_date: {
+    type: Date,
+  },
   couple_membership_amount: {
     type: Number,
     required: true,
   },
-  total_passes : {
-    type : Number,
+  total_passes: {
+    type: Number,
   },
-  total_guests_allowed : {
-    type : Number,
+  total_guests_allowed: {
+    type: Number,
   },
   created_at: {
     type: Date,
@@ -54,29 +70,26 @@ const membershipSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  booking_type : {
-    type : [],
-    required : true
+  booking_type: {
+    type: [],
+    required: true,
   },
-  default_membership : {
-    type : Boolean,
-    default : false
-  }
+  default_membership: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-
 membershipSchema.pre("findByIdAndUpdate", function (next) {
-    this.updated_at = new Date();
-    next();
-  });
+  this.updated_at = new Date();
+  next();
+});
 
 membershipSchema.pre("save", function (next) {
-    this.updated_at = new Date();
-    next();
-  });
-  
+  this.updated_at = new Date();
+  next();
+});
+
 const MembershipModel = mongoose.model("memberships", membershipSchema);
 
 module.exports = MembershipModel;
-
-
