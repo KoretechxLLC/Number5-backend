@@ -6,11 +6,11 @@ const {
 } = require("../../helper/validation_schema");
 const path = require("path");
 const fs = require("fs");
+const MembershipModel = require("../Models/membership.model");
 
 const UserController = {
   get: async (req, res, next) => {
     try {
-
       const payload = req.payload;
       const id = payload.aud;
 
@@ -40,14 +40,14 @@ const UserController = {
         id: user?.id,
         sexuality: user?.sexuality,
         life_style: user?.life_style,
-        membership : user?.membership,
-        card_number : user?.card_number,
+        membership: user?.membership,
+        card_number: user?.card_number,
         wanted_experience: user?.wanted_experience,
         user_quality: user?.user_quality,
         user_status: user?.user_status,
         is_fee_paid: user?.is_fee_paid,
-        membership_id : user?.membership_id,
-        username : user?.username,
+        membership_id: user?.membership_id,
+        username: user?.username,
         profile_pic: user?.profile_pic,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
@@ -138,6 +138,51 @@ const UserController = {
 
       if (err.isJoi) return next(createError.BadRequest());
 
+      next(err);
+    }
+  },
+
+  upgrade_membership: async (req, res, next) => {
+    try {
+      let { membership, id, amount } = req.body;
+
+      if (!membership || Object.keys(membership).length == 0 || !id) {
+        throw createError.BadRequest("Required fields are missing");
+      }
+
+      let userData = await UserModel.findById(id);
+
+      if (!userData) throw createError.NotFound("User Not Found");
+
+      let membershipData = await MembershipModel.findById(membership?._id);
+
+      if (!membershipData) throw createError.NotFound("Membership Not Found");
+
+      membershipData.consumedPasses = 0;
+      membershipData.guestAttended = 0;
+      membershipData.remainingVisits = membershipData?.total_passes;
+      membershipData.purchase_date = new Date();
+     
+      let expiryDate = new Date(membershipData.purchase_date);
+      expiryDate.setMonth(expiryDate.getMonth() + 1)
+
+      membershipData.expiry_date = expiryDate;
+
+      let updatedUserData = await UserModel.findByIdAndUpdate(
+        id,
+        { $set: { membership: membershipData } },
+        { new: true }
+      );
+
+      let dataToSend = { ...updatedUserData._doc };
+
+      dataToSend.id = updatedUserData?._id;
+
+      res.status(200).json({
+        message: "User Data Successfully Updated",
+        data: dataToSend,
+      });
+    } catch (err) {
       next(err);
     }
   },

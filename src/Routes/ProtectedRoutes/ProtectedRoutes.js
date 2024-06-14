@@ -114,4 +114,10 @@ router.put(
   MembershipController.update_membersip
 );
 
+router.post(
+  "/upgrade-membership",
+  verifyAccessToken,
+  UserController.upgrade_membership
+);
+
 module.exports = router;
