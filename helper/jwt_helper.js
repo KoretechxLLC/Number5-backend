@@ -101,11 +101,12 @@ module.exports = {
 
         let token = authHeader.split(' ')?.[1]
 
+
         if (!token) {
 
             return next(createError.Unauthorized())
         }
-
+        
         jwt.verify(token, process.env.ACCESS_SECRET_KEY, (err, payload) => {
 
             if (err) {

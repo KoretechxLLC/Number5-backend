@@ -119,6 +119,10 @@ const MembershipController = {
         membershipData.gender_type = JSON.parse(membershipData.gender_type);
       }
 
+      if (membershipData?.booking_type) {
+        membershipData.booking_type = JSON.parse(membershipData.booking_type);
+      }
+
       if (membershipData?.benefits) {
         membershipData.benefits = JSON.parse(membershipData.benefits);
       }

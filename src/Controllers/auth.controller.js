@@ -100,8 +100,6 @@ const AuthController = {
 
       userData.membership = default_membership;
 
-      console.log(userData, "userDta");
-
       let result = await authSchema.validateAsync(userData);
 
       const existingUser = await UserModel.findOne({

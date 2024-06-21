@@ -42,6 +42,10 @@ const eventSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  event_couple_ticket_price: {
+    type: Number,
+    required: true,
+  },
   event_pic: {
     type: String,
     required: true,
