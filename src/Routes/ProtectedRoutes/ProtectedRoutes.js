@@ -11,6 +11,9 @@ const uploadEventImage = require("../../../utils/upload.eventImage");
 const EventController = require("../../Controllers/event.controller");
 const MembershipController = require("../../Controllers/membership.controller");
 const uploadBadgeImage = require("../../../utils/upload.badgeImage");
+const uploadGuestIdcardImage = require("../../../utils/upload.guestIdcardImage");
+const EventBooking = require("../../Controllers/eventbooking.controller");
+const EventBookingController = require("../../Controllers/eventbooking.controller");
 
 const router = express.Router();
 
@@ -118,6 +121,46 @@ router.post(
   "/upgrade-membership",
   verifyAccessToken,
   UserController.upgrade_membership
+);
+
+router.post(
+  "/event-booking",
+  verifyAccessToken,
+  uploadGuestIdcardImage.array("idCard"),
+  EventBookingController.post
+);
+
+router.get(
+  "/get-bookings/:id",
+  verifyAccessToken,
+  EventBookingController.getInprocessBookings
+);
+
+router.get(
+  "/get-event-bookings/:eventId",
+  verifyAccessToken,
+  verifyAdminRole,
+  EventBookingController.getEventBooking
+);
+
+router.get(
+  "/get-event-history/:id",
+  verifyAccessToken,
+  verifyAdminRole,
+  EventBookingController.getUserEventsHistory
+);
+
+router.put(
+  "/change-arrival-time",
+  verifyAccessToken,
+  EventBookingController.changeArrivalTime
+);
+
+
+router.put(
+  "/cancel-booking/:id",
+  verifyAccessToken,
+  EventBookingController.cancelBooking
 );
 
 module.exports = router;
