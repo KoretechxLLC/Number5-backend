@@ -106,6 +106,12 @@ async function generatePDF(data) {
           <span class="label">Ticket Type:</span>
           <span class="value">${data.ticket_type}</span>
         </div>
+        
+        <div class="section">
+          <span class="label">Event Name:</span>
+          <span class="value">${data.event_name}</span>
+        </div>
+
         <div class="section">
           <span class="label">Date:</span>
           <span class="value">${data.event_date}</span>
@@ -122,13 +128,17 @@ async function generatePDF(data) {
           <span class="label">Amount:</span>
           <span class="value">£${data.amount}</span>
         </div>
-        
       </div>
     </body>
     </html>`;
 
+    const sanitizedUsername = data.username.replace(/\s/g, "");
+    const sanitizedEventName = data.event_name.replace(/\s/g, "");
+
     const pdfPath =
-      path.join(__dirname, "../../public/PDF/") + `ticket#${data.username}.pdf`;
+      path.join(__dirname, "../../public/PDF/") +
+      `ticket${sanitizedUsername}${sanitizedEventName}.pdf`;
+
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox"],
@@ -305,6 +315,7 @@ const EventBookingController = {
         event_start_time: event.event_start_time,
         ticket_type: selected_booking_type?.type,
         no_of_guests: no_of_guests,
+        event_name: event?.event_name,
         amount: amount,
       };
 
@@ -350,11 +361,11 @@ const EventBookingController = {
           );
         }
 
-        fs.unlink(pdfPath, (err) => {
-          if (err) {
-            console.error("Error deleting PDF:", err);
-          }
-        });
+        //   fs.unlink(pdfPath, (err) => {
+        //     if (err) {
+        //       console.error("Error deleting PDF:", err);
+        //     }
+        //   });
       }
 
       await session.commitTransaction();

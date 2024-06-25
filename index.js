@@ -40,6 +40,11 @@ app.use(
   express.static(path.join(__dirname, "public", "ticketback"))
 );
 
+app.use(
+  "/PDF",
+  express.static(path.join(__dirname, "public", "PDF"))
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
