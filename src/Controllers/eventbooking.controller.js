@@ -490,7 +490,6 @@ const EventBookingController = {
       next(err);
     }
   },
-
   cancelBooking: async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -557,6 +556,96 @@ const EventBookingController = {
           data: [],
         });
       }
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      next(err);
+    }
+  },
+  consumeBooking: async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      let { bookingId, attendedTime } = req.body;
+
+  
+
+      if (!bookingId || !attendedTime)
+        throw createError.BadRequest("Required fields are missing");
+
+      let booking = await BookingModel.findById(bookingId).session(session);
+
+      if (!booking) throw createError.NotFound("Booking Not Found");
+
+      if (booking.is_event_attended || booking.booking_status == "completed") {
+        throw createError.BadRequest("You have already attended this event");
+      }
+
+      let eventDate = booking.event_data.event_date;
+
+      eventDate = new Date(eventDate);
+      attendedTime = new Date(attendedTime);
+
+      let eventDay = eventDate.getDate();
+      let eventMonth = eventDate.getMonth();
+      let eventYear = eventDate.getFullYear();
+
+      let day = attendedTime.getDate();
+      let month = attendedTime.getMonth();
+      let year = attendedTime.getFullYear();
+
+      if (eventDay != day || eventMonth != month || eventYear != year) {
+        throw createError.BadRequest("You can only attend event on event date");
+      }
+
+      if (booking.booking_status == "cancelled")
+        throw createError.BadRequest("You have already cancelled this booking");
+
+      booking.booking_status = "completed";
+      booking.is_fee_paid = true;
+      booking.is_event_attended = true;
+      booking.attendedTime = new Date(attendedTime);
+
+      await booking.save({ session });
+
+      let userId = booking.userId;
+      let user = await UserModel.findById(userId).session(session);
+
+      let bookingSelectedType = booking?.selected_booking_type?.type;
+      let membershipBookingType = user.membership.booking_type;
+
+      let isExists =
+        membershipBookingType &&
+        membershipBookingType.length > 0 &&
+        membershipBookingType.some((e, i) => {
+          return e.type == bookingSelectedType;
+        });
+
+      if (isExists && !user.membership.default_membership) {
+        if (Number(user.membership.remainingVisits) <= 0) {
+          throw createError.BadRequest(
+            "You don't have enough visits to attend this event"
+          );
+        }
+
+        user.membership.consumedPasses = user.membership.consumedPasses + 1;
+        user.membership.remainingVisits = user.membership.remainingVisits - 1;
+
+        user.markModified("membership");
+        await user.save({ session });
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res
+        .status(200)
+        .json({
+          message: "Booking consumed successfully",
+          bookingData: booking,
+          userData: user,
+        });
     } catch (err) {
       await session.abortTransaction();
       session.endSession();

@@ -163,4 +163,12 @@ router.put(
   EventBookingController.cancelBooking
 );
 
+
+router.put(
+  "/attend-event",
+  verifyAccessToken,
+  EventBookingController.consumeBooking
+);
+
+
 module.exports = router;

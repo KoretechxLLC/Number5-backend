@@ -81,6 +81,9 @@ const BookingSchema = new mongoose.Schema({
     cancellation_date : {
         type : Date,
     },
+    attended_time : {
+        type : Date,
+    },
     status : {
         type : String,
         required : true

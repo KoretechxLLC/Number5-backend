@@ -25,6 +25,7 @@ const client = require("../../helper/redis_init");
 const path = require("path");
 const fs = require("fs");
 const MembershipModel = require("../Models/membership.model");
+const bcrypt = require("bcrypt");
 
 const AuthController = {
   registerUser: async (req, res, next) => {
@@ -419,6 +420,11 @@ const AuthController = {
       const cardNumber = await generateCardNumber();
 
       user.membership_id = membership_id;
+
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(password, salt);
+      password = hashPassword;
+
       user.password = password;
       user.username = username;
       user.card_number = cardNumber;
@@ -551,7 +557,9 @@ const AuthController = {
         return next(createError.NotFound("User not found"));
       }
 
-      user.password = password;
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(password, salt);
+      user.password = hashPassword;
 
       await user.save();
 
