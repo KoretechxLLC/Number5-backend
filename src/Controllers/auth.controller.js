@@ -414,7 +414,7 @@ const AuthController = {
         throw createError.BadRequest("The user has already been approved");
       }
 
-      const password = await generateRandomPassword(15);
+      let password = await generateRandomPassword(8);
       const membership_id = await generateMembershipID(15);
       const username = await generateUsername(user);
       const cardNumber = await generateCardNumber();

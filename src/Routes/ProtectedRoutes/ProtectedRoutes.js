@@ -21,7 +21,7 @@ router.get("/get-user-data", verifyAccessToken, UserController.get);
 
 router.put(
   "/edit-user-data",
-  // verifyAccessToken,
+  verifyAccessToken,
   uploadProfileImage.single("profileImage"),
   UserController.put
 );
@@ -139,14 +139,12 @@ router.get(
 router.get(
   "/get-event-bookings/:eventId",
   verifyAccessToken,
-  verifyAdminRole,
   EventBookingController.getEventBooking
 );
 
 router.get(
   "/get-event-history/:id",
   verifyAccessToken,
-  verifyAdminRole,
   EventBookingController.getUserEventsHistory
 );
 
@@ -156,19 +154,16 @@ router.put(
   EventBookingController.changeArrivalTime
 );
 
-
 router.put(
   "/cancel-booking/:id",
   verifyAccessToken,
   EventBookingController.cancelBooking
 );
 
-
 router.put(
   "/attend-event",
   verifyAccessToken,
   EventBookingController.consumeBooking
 );
-
 
 module.exports = router;
