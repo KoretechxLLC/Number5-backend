@@ -145,7 +145,7 @@ const UserController = {
   upgrade_membership: async (req, res, next) => {
     try {
       let { membership, id, amount } = req.body;
-
+      
       if (!membership || Object.keys(membership).length == 0 || !id) {
         throw createError.BadRequest("Required fields are missing");
       }
@@ -162,9 +162,9 @@ const UserController = {
       membershipData.guestAttended = 0;
       membershipData.remainingVisits = membershipData?.total_passes;
       membershipData.purchase_date = new Date();
-     
+
       let expiryDate = new Date(membershipData.purchase_date);
-      expiryDate.setMonth(expiryDate.getMonth() + 1)
+      expiryDate.setMonth(expiryDate.getMonth() + 1);
 
       membershipData.expiry_date = expiryDate;
 
