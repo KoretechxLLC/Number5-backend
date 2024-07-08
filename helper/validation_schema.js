@@ -6,11 +6,7 @@ const authSchema = joi.object({
   profile_pic: joi.string().required(),
   gender: joi.string().required(),
   date_of_birth: joi.string(),
-  phone_number: joi
-    .string()
-    .regex(
-      /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/
-    ),
+  phone_number: joi.string(),
   full_name: joi.string().required(),
   address: joi?.string().required(),
   occupation: joi?.string().required(),
@@ -23,7 +19,7 @@ const authSchema = joi.object({
   is_agree_terms_and_conditions: joi.boolean().required(),
   user_status: joi.string(),
   id: joi.string(),
-  membership : joi.object(),
+  membership: joi.object(),
   email: joi.string().email().lowercase().required(),
   partner_details: joi.when("registration_type", {
     is: joi.string().valid("couples"),
@@ -38,11 +34,7 @@ const updateUserSchema = joi.object({
   profile_pic: joi.string().required(),
   gender: joi.string().required(),
   date_of_birth: joi.string(),
-  phone_number: joi
-    .string()
-    .regex(
-      /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/
-    ),
+  phone_number: joi.string(),
   full_name: joi.string().required(),
   address: joi?.string().required(),
   occupation: joi?.string().required(),
@@ -64,17 +56,13 @@ const partnerSchema = joi.object({
   profile_pic: joi.string().required(),
   gender: joi.string().required(),
   date_of_birth: joi.string(),
-  phone_number: joi
-    .string()
-    .regex(
-      /^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/
-    ),
+  phone_number: joi.string(),
   full_name: joi.string().required(),
   address: joi?.string().required(),
   occupation: joi?.string().required(),
   height: joi?.number().required(),
   weight: joi?.number().required(),
-  membership : joi?.object(),
+  membership: joi?.object(),
   sexuality: joi.string().required(),
   life_style: joi.string().required(),
   wanted_experience: joi.string().required(),
@@ -134,6 +122,7 @@ const EventSchema = joi.object({
   event_description: joi.string().max(1000).required(),
   event_sop: joi.array().required(),
   event_ticket_price: joi.number().required(),
+  event_couple_ticket_price : joi.number().required(),
   event_pic: joi.string().required(),
   id: joi.string(),
 });

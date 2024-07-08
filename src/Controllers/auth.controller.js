@@ -62,10 +62,16 @@ const AuthController = {
       } = userData;
 
       if (!profileImageName)
-        throw createError.BadRequest("Required Fields Are Missing");
+        throw createError.BadRequest(
+          `Invalid ${
+            registration_type?.toLowerCase() === "couples"
+              ? "Member1 Profile"
+              : "Profile"
+          } Image`
+        );
 
       if (registration_type?.toLowerCase() === "couples" && !partnerImageName)
-        throw createError.BadRequest("Required Fields Are Missing");
+        throw createError.BadRequest("Invalid Member2 Profile Image");
 
       if (
         !registration_type ||
@@ -115,6 +121,20 @@ const AuthController = {
               : `This email already exists`
           )
         );
+
+      let isPhoneNumberExists = await UserModel.findOne({
+        phone_number: result?.phone_number,
+      });
+
+      if (isPhoneNumberExists) {
+        return next(
+          createError.Conflict(
+            registration_type?.toLowerCase() == "couples"
+              ? `Member1 phone number already exists`
+              : `This phone number already exists`
+          )
+        );
+      }
 
       if (
         registration_type?.toLowerCase() === "couples" &&
@@ -186,6 +206,22 @@ const AuthController = {
           session.endSession();
           next(createError.Conflict(`Member 2 email already exists`));
           return;
+        }
+
+        let isPhoneNumberExists = await UserModel.findOne({
+          phone_number: partnerData?.phone_number,
+        });
+
+        if (isPhoneNumberExists) {
+          await session.abortTransaction();
+          session.endSession();
+          return next(
+            createError.Conflict(
+              registration_type?.toLowerCase() == "couples"
+                ? `Member2 phone number already exists`
+                : `This phone number already exists`
+            )
+          );
         }
 
         const user = new UserModel({
@@ -421,6 +457,8 @@ const AuthController = {
 
       user.membership_id = membership_id;
 
+      let emailPassword = password;
+
       const salt = await bcrypt.genSalt(10);
       const hashPassword = await bcrypt.hash(password, salt);
       password = hashPassword;
@@ -443,7 +481,7 @@ const AuthController = {
 
       <br/>
 
-      password: ${password}
+      password: ${emailPassword}
       
       <br/>
     

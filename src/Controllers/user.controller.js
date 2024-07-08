@@ -82,6 +82,17 @@ const UserController = {
         throw createError.NotFound("User Not Found");
       }
 
+      let phoneNumber = userData.phone_number;
+      let userId = user._id;
+
+      let isPhoneNumberExists = await UserModel.find({
+        phone_number: phoneNumber,
+        _id: { $ne: userId },
+      });
+
+      if (isPhoneNumberExists && isPhoneNumberExists?.length > 0)
+        throw createError.BadRequest("Phone Number already exists");
+
       if (!filename) {
         userData.profile_pic = user?.profile_pic;
       }
@@ -145,7 +156,7 @@ const UserController = {
   upgrade_membership: async (req, res, next) => {
     try {
       let { membership, id, amount } = req.body;
-      
+
       if (!membership || Object.keys(membership).length == 0 || !id) {
         throw createError.BadRequest("Required fields are missing");
       }

@@ -20,6 +20,7 @@ const EventController = {
         longitude,
         event_description,
         event_sop,
+        event_couple_ticket_price
       } = req.body;
 
       if (
@@ -31,7 +32,8 @@ const EventController = {
         !latitude ||
         !longitude ||
         !event_description ||
-        !event_sop
+        !event_sop || 
+        !event_couple_ticket_price
       ) {
         throw createError.BadRequest("Required fields are missing");
       }
