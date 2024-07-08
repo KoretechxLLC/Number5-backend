@@ -5,155 +5,119 @@ const createError = require("http-errors");
 const path = require("path");
 const fs = require("fs");
 const mongoose = require("mongoose");
-
+const { PDFDocument, rgb } = require("pdf-lib");
 const puppeteer = require("puppeteer");
+const fontkit = require("@pdf-lib/fontkit");
 const {
   sendEmailWithAttachment,
   sendEmail,
 } = require("../../helper/send_email");
 
 async function generatePDF(data) {
-  return new Promise(async (resolve, reject) => {
-    const imagePath = path.resolve(
-      __dirname,
-      "../../public/images/ticketback.png"
-    );
+  const pdfDoc = await PDFDocument.create();
 
-    const imageSrc = `data:image/jpeg;base64,${fs.readFileSync(imagePath, {
-      encoding: "base64",
-    })}`;
+  pdfDoc.registerFontkit(fontkit);
 
-    const html = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Event Ticket</title>
-      <style>
+  const page = pdfDoc.addPage([200, 260]);
+  const imagePath = path.resolve(
+    __dirname,
+    "../../public/images/ticketback.png"
+  );
+  const imageBytes = fs.readFileSync(imagePath);
 
-        html, body {
-          width: 70mm;
-          height: 120mm;
-          margin: 0;
-          padding: 0;
-          font-family: 'Poppins', sans-serif;
-          background-color :  #212226;
-          color: white;
-          display: flex;
-          justify-content: center;
-          align-items:center;
+  const image = await pdfDoc.embedPng(imageBytes);
 
-          }
-        .ticket {
-          background: rgba(0, 0, 0, 0.7);
-          padding: 10px;
-          border-radius: 10px;
-          background-image: url(${imageSrc});
-          background-size: cover;
-          background-repeat: no-repeat;
-          background-position: center;
-          background-color : #212226;
-          width: 60mm; /* adjusted for padding and border */
-          height: 100mm; /* adjusted for padding and border */
-          box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
-        .ticket h1 {
-          font-size: 16px;
-          margin-bottom: 5px;
-          color: #fff;
-          text-align: center;
-          padding-bottom: 5px;
-        }
-        .section {
-          border-bottom: 1px solid #474747;
-          padding: 5px 0;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .label {
-          font-size: 10px;
-          font-weight: 500;
-        }
-        .value {
-          font-size: 10px;
-          font-weight: 400;
-          color: #FFD700;
-        }
-        .note {
-          font-size: 8px;
-          text-align: center;
-          color: #FFD700;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="ticket">
-        <h1>Event Ticket</h1>
-        <div class="section">
-          <span class="label">Name:</span>
-          <span class="value">${data.username}</span>
-        </div>
-        <div class="section">
-          <span class="label">Membership Type:</span>
-          <span class="value">${data.membership_type}</span>
-        </div>
-           <div class="section">
-          <span class="label">Ticket Type:</span>
-          <span class="value">${data.ticket_type}</span>
-        </div>
-        
-        <div class="section">
-          <span class="label">Event Name:</span>
-          <span class="value">${data.event_name}</span>
-        </div>
+  const { width, height } = image.scale(1);
 
-        <div class="section">
-          <span class="label">Date:</span>
-          <span class="value">${data.event_date}</span>
-        </div>
-        <div class="section">
-          <span class="label">Event Time:</span>
-          <span class="value">${data.event_start_time}</span>
-        </div>
-        <div class="section">
-          <span class="label">No. of guests:</span>
-          <span class="value">${data.no_of_guests}</span>
-        </div>
-        <div class="section">
-          <span class="label">Amount:</span>
-          <span class="value">£${data.amount}</span>
-        </div>
-      </div>
-    </body>
-    </html>`;
+  const fontBytes = fs.readFileSync(
+    path.join(__dirname, "../fonts/PoppinsRegular400.ttf")
+  );
+  const customFont = await pdfDoc.embedFont(fontBytes);
 
-    const sanitizedUsername = data.username.replace(/\s/g, "");
-    const sanitizedEventName = data.event_name.replace(/\s/g, "");
+  page.setFont(customFont);
 
-    const pdfPath =
-      path.join(__dirname, "../../public/PDF/") +
-      `ticket${sanitizedUsername}${sanitizedEventName}.pdf`;
-
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox"],
-    });
-    const page = await browser.newPage();
-    await page.setContent(html);
-    await page.pdf({
-      path: pdfPath,
-      width: "70mm",
-      height: "120mm",
-      printBackground: true,
-    });
-    await browser.close();
-    resolve(pdfPath);
+  page.drawRectangle({
+    x: 0,
+    y: 0,
+    width: 200,
+    height: 260,
+    borderRadius: 10,
+    borderColor: rgb(0.08, 0.2, 0.12),
+    borderWidth: 2,
+    color: rgb(33 / 255, 34 / 255, 38 / 255),
   });
+
+  page.drawImage(image, {
+    x: 0,
+    y: 0,
+    width: 200,
+    height: 260,
+  });
+
+  const eventTicketText = "Event Ticket";
+  const eventTicketSize = 16;
+  const eventTicketWidth = customFont.widthOfTextAtSize(
+    eventTicketText,
+    eventTicketSize
+  );
+  const eventTicketX = (200 - eventTicketWidth) / 2;
+
+  page.drawText(eventTicketText, {
+    x: eventTicketX,
+    y: 230,
+    size: eventTicketSize,
+    color: rgb(1, 1, 1),
+  });
+
+  const sections = [
+    { label: "Name:", value: data.username, y: 200 },
+    { label: "Membership Type:", value: data.membership_type, y: 175 },
+    { label: "Ticket Type:", value: data.ticket_type, y: 150 },
+    { label: "Event Name:", value: data.event_name, y: 125 },
+    { label: "Date:", value: data.event_date, y: 100 },
+    { label: "Event Time:", value: data.event_start_time, y: 75 },
+    { label: "No. of guests:", value: data.no_of_guests, y: 50 },
+    { label: "Amount:", value: `£${data.amount}`, y: 25 },
+  ];
+
+  const marginBottom = 10;
+
+  sections.forEach((section) => {
+    page.drawText(section.label, {
+      x: 5,
+      y: section.y,
+      size: 7,
+      color: rgb(1, 1, 1),
+    });
+
+    const textWidth = customFont.widthOfTextAtSize(section.value, 7);
+    const xPosition = 195 - textWidth;
+
+    page.drawText(section.value, {
+      x: xPosition - 5,
+      y: section.y,
+      size: 7,
+      color: rgb(239 / 255, 187 / 255, 30 / 255),
+    });
+
+    page.drawLine({
+      start: { x: 5, y: section.y - 8 },
+      end: { x: 195, y: section.y - 8 },
+      thickness: 0.5,
+      color: rgb(0.71, 0.71, 0.71),
+    });
+  });
+
+  const pdfBytes = await pdfDoc.save();
+
+  const sanitizedUsername = data.username.replace(/\s/g, "");
+  const sanitizedEventName = data.event_name.replace(/\s/g, "");
+  const pdfPath =
+    path.join(__dirname, "../../public/PDF/") +
+    `ticket${sanitizedUsername}${sanitizedEventName}.pdf`;
+  fs.writeFileSync(pdfPath, pdfBytes);
+
+  return pdfPath;
 }
 
 const EventBookingController = {
@@ -569,8 +533,6 @@ const EventBookingController = {
     try {
       let { bookingId, attendedTime } = req.body;
 
-  
-
       if (!bookingId || !attendedTime)
         throw createError.BadRequest("Required fields are missing");
 
@@ -639,13 +601,11 @@ const EventBookingController = {
       await session.commitTransaction();
       session.endSession();
 
-      res
-        .status(200)
-        .json({
-          message: "Booking consumed successfully",
-          bookingData: booking,
-          userData: user,
-        });
+      res.status(200).json({
+        message: "Booking consumed successfully",
+        bookingData: booking,
+        userData: user,
+      });
     } catch (err) {
       await session.abortTransaction();
       session.endSession();
