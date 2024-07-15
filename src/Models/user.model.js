@@ -18,7 +18,11 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-  full_name: {
+  first_name: {
+    type: String,
+    required: true,
+  },
+  last_name: {
     type: String,
     required: true,
   },
@@ -81,8 +85,8 @@ const UserSchema = new Schema({
   membership_id: {
     type: String,
   },
-  membership : {
-    type : {},
+  membership: {
+    type: {},
   },
   username: {
     type: String,
@@ -93,18 +97,18 @@ const UserSchema = new Schema({
   approved_date: {
     type: Date,
   },
-  account_created_by : {
-    type : String,
+  account_created_by: {
+    type: String,
   },
   role: {
     type: String,
     default: "user",
   },
-  card_number : {
-    type : Number,
+  card_number: {
+    type: Number,
   },
-  partner_ref : {
-    type : String,
+  partner_ref: {
+    type: String,
   },
   created_at: {
     type: Date,
@@ -127,7 +131,7 @@ UserSchema.pre("save", function (next) {
 //     const hashPassword = await bcrypt.hash(this.password, salt);
 //     this.password = hashPassword;
 //     next();
-    
+
 //   } else {
 //     next();
 //   }
