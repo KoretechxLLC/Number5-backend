@@ -45,7 +45,8 @@ const AuthController = {
         registration_type,
         couples_type,
         gender,
-        full_name,
+        first_name,
+        last_name,
         date_of_birth,
         email,
         phone_number,
@@ -60,6 +61,8 @@ const AuthController = {
         partner_details,
         is_agree_terms_and_conditions,
       } = userData;
+
+      console.log(userData, "userData");
 
       if (!profileImageName)
         throw createError.BadRequest(
@@ -76,7 +79,8 @@ const AuthController = {
       if (
         !registration_type ||
         !gender ||
-        !full_name ||
+        !first_name ||
+        !last_name ||
         !date_of_birth ||
         !email ||
         !phone_number ||
@@ -150,7 +154,8 @@ const AuthController = {
           registration_type,
           couples_type,
           gender,
-          full_name,
+          first_name,
+          last_name,
           date_of_birth,
           email,
           phone_number,
@@ -168,7 +173,8 @@ const AuthController = {
         if (
           !registration_type ||
           !gender ||
-          !full_name ||
+          !first_name ||
+          !last_name ||
           !date_of_birth ||
           !email ||
           !phone_number ||
@@ -243,7 +249,8 @@ const AuthController = {
           is_agree_terms_and_conditions:
             partnerData?.is_agree_terms_and_conditions,
           membership: partner_details?.membership,
-          full_name: partnerData.full_name,
+          first_name: partnerData.first_name,
+          last_name: partnerData?.last_name,
           email: partnerData.email,
           account_created_by: result?.email,
         });
@@ -270,7 +277,8 @@ const AuthController = {
         membership: result?.membership,
         profile_pic: profileImageName,
         is_agree_terms_and_conditions: result?.is_agree_terms_and_conditions,
-        full_name: result.full_name,
+        first_name: result.first_name,
+        last_name: result?.last_name,
         account_created_by: result?.email,
         partner_ref: partnerUser?.id,
         email: result.email,
@@ -388,7 +396,8 @@ const AuthController = {
         registration_type: user?.registration_type,
         couples_type: user?.couples_type,
         gender: user?.gender,
-        full_name: user?.full_name,
+        first_name: user?.first_name,
+        last_name: user?.last_name,
         date_of_birth: user?.date_of_birth,
         email: user?.email,
         phone_number: user?.phone_number,
@@ -446,7 +455,11 @@ const AuthController = {
         throw createError.NotFound("User not found");
       }
 
-      if (user.user_status.toLowerCase() === "approved") {
+      if (
+        user &&
+        user?.user_status &&
+        user?.user_status?.toString().toLowerCase() == "approved"
+      ) {
         throw createError.BadRequest("The user has already been approved");
       }
 
@@ -469,7 +482,6 @@ const AuthController = {
       user.user_status = "approved";
       user.approved_date = new Date();
 
-      // Save changes within the session
       const savedUser = await user.save({ session });
 
       let subject = "Registration Approval";

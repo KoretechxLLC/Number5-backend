@@ -37,13 +37,9 @@ const generateMembershipID = async () => {
 };
 
 const generateUsername = async (user) => {
-  const { full_name } = user;
+  const { first_name, last_name } = user;
 
-  const nameParts = full_name.toLowerCase().split(" ");
-  const firstName = nameParts?.[0];
-  const lastName = nameParts?.[1];
-
-  let baseUsername = (firstName || "") + (lastName || "");
+  let baseUsername = (first_name || "") + (last_name || "");
 
   let username = baseUsername;
 

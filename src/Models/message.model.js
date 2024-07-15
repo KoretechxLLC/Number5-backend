@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const Schema = mongoose.Schema;
 
 const MessageSchema = new Schema({
@@ -16,7 +15,11 @@ const MessageSchema = new Schema({
     type: String,
     required: true,
   },
-  full_name: {
+  first_name: {
+    type: String,
+    required: true,
+  },
+  last_name: {
     type: String,
     required: true,
   },
@@ -41,9 +44,9 @@ const MessageSchema = new Schema({
     type: String,
     required: true,
   },
-  status : {
-    type : String,
-    default : "pending"
+  status: {
+    type: String,
+    default: "pending",
   },
   created_at: {
     type: Date,

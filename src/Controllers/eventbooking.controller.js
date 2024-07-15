@@ -273,7 +273,7 @@ const EventBookingController = {
       let booking = await BookingModel.create([bookingData], { session });
 
       let dataToSend = {
-        username: user.full_name,
+        username: user.first_name + " " + user?.last_name,
         membership_type: user.membership.package_name,
         event_date: new Date(event.event_date).toLocaleDateString(),
         event_start_time: event.event_start_time,

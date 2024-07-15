@@ -22,12 +22,13 @@ const HelpController = {
       let userMessage = new HelpModel({
         subject: result?.subject,
         message: result?.message,
-        full_name: user?.full_name,
+        first_name: user?.first_name,
+        last_name: user?.last_name,
         email: user?.email,
         phone_number: user?.phone_number,
         address: user?.address,
         username: user?.username,
-        membership_id: user?.membership_id,
+      membership_id: user?.membership_id,
         userId: result?.id,
       });
 
