@@ -93,8 +93,6 @@ module.exports = {
 
         let authHeader = req.headers['authorization']
 
-        console.log(authHeader,"header")
-
         if (!authHeader) {
 
             return next(createError.Unauthorized())

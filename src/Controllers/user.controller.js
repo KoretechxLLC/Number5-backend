@@ -50,7 +50,7 @@ const UserController = {
         membership_id: user?.membership_id,
         username: user?.username,
         profile_pic: user?.profile_pic,
-        token : user?.token,
+        token: user?.token,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
       };
@@ -154,7 +154,6 @@ const UserController = {
       next(err);
     }
   },
-
   upgrade_membership: async (req, res, next) => {
     try {
       let { membership, id, amount } = req.body;
@@ -221,11 +220,41 @@ const UserController = {
       next(err);
     }
   },
+  delete_user_account: async (req, res, next) => {
+    try {
+      let { id } = req.params;
 
-  
+      let user = await UserModel.findByIdAndDelete(id);
+
+      if (!user) throw createError.NotFound("User Not Found");
+
+      res.status(200).json({
+        message: "User Account Successfully Deleted",
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  push_notification_option: async (req, res, next) => {
+    try {
+      let { pushNotificationOption, id } = req.body;
+
+      let user = await UserModel.findOne({ _id: id });
+      if (!user) throw createError.BadRequest("No User Found");
+
+      user.push_notification_option = pushNotificationOption;
+
+      await user.save();
+
+      res.status(200).json({
+        message: "Push Notification Option Successfully Updated",
+      });
 
 
-
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
 module.exports = UserController;

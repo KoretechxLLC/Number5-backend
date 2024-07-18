@@ -172,4 +172,17 @@ router.put(
   UserController.save_notification_token
 );
 
+router.delete(
+  "/delete-user/:id",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.delete_user_account
+);
+
+router.post(
+  "/change-notification-option",
+  verifyAccessToken,
+  UserController.push_notification_option
+);
+
 module.exports = router;
