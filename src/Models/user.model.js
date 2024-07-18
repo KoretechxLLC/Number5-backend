@@ -113,6 +113,9 @@ const UserSchema = new Schema({
   token : {
     type : String
   },
+  push_notification_option : {
+    type : Boolean
+  },
   created_at: {
     type: Date,
     default: Date.now,

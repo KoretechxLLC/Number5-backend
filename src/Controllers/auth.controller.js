@@ -62,7 +62,6 @@ const AuthController = {
         is_agree_terms_and_conditions,
       } = userData;
 
-      console.log(userData, "userData");
 
       if (!profileImageName)
         throw createError.BadRequest(
