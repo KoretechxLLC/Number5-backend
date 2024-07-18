@@ -416,6 +416,7 @@ const AuthController = {
         membership: user?.membership,
         card_number: user?.card_number,
         membership_id: user?.membership_id,
+        token : user?.token,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
       };

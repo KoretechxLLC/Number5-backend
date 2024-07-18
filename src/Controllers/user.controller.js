@@ -50,6 +50,7 @@ const UserController = {
         membership_id: user?.membership_id,
         username: user?.username,
         profile_pic: user?.profile_pic,
+        token : user?.token,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
       };
@@ -198,6 +199,33 @@ const UserController = {
       next(err);
     }
   },
+  save_notification_token: async (req, res, next) => {
+    try {
+      let { token, userId } = req.body;
+
+      if (!token || !userId)
+        throw createError.BadRequest("Required fields are missing");
+
+      let user = await UserModel.findById(userId);
+
+      if (!user) throw createError.NotFound("User Not Found");
+
+      user.token = token;
+
+      await user.save();
+
+      res.status(200).json({
+        message: "Device Token Successfully Updated",
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  
+
+
+
 };
 
 module.exports = UserController;

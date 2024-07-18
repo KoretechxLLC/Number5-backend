@@ -110,6 +110,9 @@ const UserSchema = new Schema({
   partner_ref: {
     type: String,
   },
+  token : {
+    type : String
+  },
   created_at: {
     type: Date,
     default: Date.now,

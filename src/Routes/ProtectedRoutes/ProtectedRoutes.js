@@ -166,4 +166,10 @@ router.put(
   EventBookingController.consumeBooking
 );
 
+router.put(
+  "/save-device-token",
+  verifyAccessToken,
+  UserController.save_notification_token
+);
+
 module.exports = router;
