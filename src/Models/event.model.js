@@ -46,6 +46,9 @@ const eventSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  todaySpecial : {
+    type : [],
+  },
   event_pic: {
     type: String,
     required: true,
