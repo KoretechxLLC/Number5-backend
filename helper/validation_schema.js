@@ -128,6 +128,7 @@ const EventSchema = joi.object({
   event_couple_ticket_price : joi.number().required(),
   event_pic: joi.string().required(),
   id: joi.string(),
+  todaySpecial : joi.array()
 });
 
 const MembershipSchema = joi.object({

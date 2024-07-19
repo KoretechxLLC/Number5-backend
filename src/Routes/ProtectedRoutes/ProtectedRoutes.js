@@ -58,11 +58,17 @@ router.delete(
   RegistrationTypeController.deleteRegistrationType
 );
 
+
+const uploadFields = uploadEventImage.fields([
+  { name: 'eventImage', maxCount: 1 },
+  { name: 'todayspecial', maxCount: 10 } // Adjust the maxCount as needed
+]);
+
 router.post(
   "/create-event",
   verifyAccessToken,
   verifyAdminRole,
-  uploadEventImage.single("eventImage"),
+  uploadFields,
   EventController.createEvent
 );
 
@@ -95,7 +101,7 @@ router.put(
   "/update-event",
   verifyAccessToken,
   verifyAdminRole,
-  uploadEventImage.single("eventImage"),
+  uploadFields,
   EventController.updateEvent
 );
 
