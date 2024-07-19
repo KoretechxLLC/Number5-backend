@@ -138,6 +138,7 @@ const EventBookingController = {
         guest_details,
         arrival_time,
         payment_option,
+        shop_items,
         amount,
       } = req.body;
 
@@ -147,6 +148,10 @@ const EventBookingController = {
 
       if (selected_booking_type) {
         selected_booking_type = JSON.parse(selected_booking_type);
+      }
+
+      if (shop_items) {
+        shop_items = JSON.parse(shop_items);
       }
 
       if (!user_id) throw createError.BadRequest("User Id is missing");
@@ -259,6 +264,7 @@ const EventBookingController = {
         eventId: event_id,
         event_data: event,
         selected_booking_type,
+        shop_items: shop_items,
         no_of_guests,
         guest_details,
         arrival_time,
@@ -269,6 +275,8 @@ const EventBookingController = {
         booking_status: "inprocess",
         total_amount: amount,
       };
+
+      console.log(bookingData, "bookingData");
 
       let booking = await BookingModel.create([bookingData], { session });
 
