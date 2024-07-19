@@ -58,6 +58,9 @@ const BookingSchema = new mongoose.Schema({
         type : String,
         required : true
     },
+    shop_items : {
+        type : []
+    },
     payment_option : {
         type : String,
         required : true

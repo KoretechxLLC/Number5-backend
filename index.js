@@ -41,8 +41,8 @@ app.use(
 );
 
 app.use(
-  "/todayspecialImages",
-  express.static(path.join(__dirname, "public", "todayspecialImages"))
+  "/shopItemImages",
+  express.static(path.join(__dirname, "public", "shopItemImages"))
 );
 
 

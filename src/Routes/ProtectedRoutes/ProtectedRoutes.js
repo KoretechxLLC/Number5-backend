@@ -14,6 +14,8 @@ const uploadBadgeImage = require("../../../utils/upload.badgeImage");
 const uploadGuestIdcardImage = require("../../../utils/upload.guestIdcardImage");
 const EventBooking = require("../../Controllers/eventbooking.controller");
 const EventBookingController = require("../../Controllers/eventbooking.controller");
+const ShopController = require("../../Controllers/shop.controller");
+const uploadShopImage = require("../../../utils/upload.shopImage");
 
 const router = express.Router();
 
@@ -58,10 +60,9 @@ router.delete(
   RegistrationTypeController.deleteRegistrationType
 );
 
-
 const uploadFields = uploadEventImage.fields([
-  { name: 'eventImage', maxCount: 1 },
-  { name: 'todayspecial', maxCount: 10 } // Adjust the maxCount as needed
+  { name: "eventImage", maxCount: 1 },
+  { name: "todayspecial", maxCount: 10 }, // Adjust the maxCount as needed
 ]);
 
 router.post(
@@ -189,6 +190,36 @@ router.post(
   "/change-notification-option",
   verifyAccessToken,
   UserController.push_notification_option
+);
+
+router.post(
+  "/add-shop-item",
+  verifyAccessToken,
+  verifyAdminRole,
+  uploadShopImage.single("itemImage"),
+  ShopController.add_item
+);
+
+router.put(
+  "/update-shop-item",
+  verifyAccessToken,
+  verifyAdminRole,
+  uploadShopImage.single("itemImage"),
+  ShopController.update_item
+);
+
+
+router.get(
+  "/get-shop-item",
+  verifyAccessToken,
+  ShopController.get_item
+);
+router.put(
+  "/update-shop-item",
+  verifyAccessToken,
+  verifyAdminRole,
+  uploadShopImage.single("itemImage"),
+  ShopController.update_item
 );
 
 module.exports = router;
