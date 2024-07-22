@@ -77,7 +77,13 @@ async function generatePDF(data) {
     { label: "Date:", value: data.event_date, y: 100 },
     { label: "Event Time:", value: data.event_start_time, y: 75 },
     { label: "No. of guests:", value: data.no_of_guests, y: 50 },
-    { label: "Amount:", value: `£${data.amount}`, y: 25 },
+    {
+      label: "Amount:",
+      value: `${
+        data?.payment_option?.toLowerCase() == "cash" ? "Pay at Venue" : "Paid"
+      } £${data.amount}`,
+      y: 25,
+    },
   ];
 
   const marginBottom = 10;
@@ -174,7 +180,7 @@ const EventBookingController = {
       if (!arrival_time)
         throw createError.BadRequest("Arrival Time is missing");
 
-      if (!amount) throw createError.BadRequest("Amount is missing");
+      // if (!amount) throw createError.BadRequest("Amount is missing");
 
       if (
         Number(no_of_guests) > 0 &&
@@ -186,8 +192,8 @@ const EventBookingController = {
       if (!selected_booking_type)
         throw createError.BadRequest("Booking type is missing");
 
-      if (!payment_option)
-        throw createError.BadRequest("Payment Option is missing");
+      // if (!payment_option)
+      //   throw createError.BadRequest("Payment Option is missing");
 
       let checkBookings = await BookingModel.find({
         eventId: event_id,
@@ -273,10 +279,8 @@ const EventBookingController = {
         is_event_attended: false,
         status: "booked",
         booking_status: "inprocess",
-        total_amount: amount,
+        total_amount: amount ?? 0,
       };
-
-      console.log(bookingData, "bookingData");
 
       let booking = await BookingModel.create([bookingData], { session });
 
@@ -288,7 +292,8 @@ const EventBookingController = {
         ticket_type: selected_booking_type?.type,
         no_of_guests: no_of_guests,
         event_name: event?.event_name,
-        amount: amount,
+        payment_option: payment_option ? payment_option : "Paid",
+        amount: amount ?? 0,
       };
 
       let guestAttended = user.membership.guestAttended;

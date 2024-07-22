@@ -38,6 +38,7 @@ const AuthController = {
     let profileImageName = profileImage?.[0]?.filename;
     let partnerImageName = partnerImage?.[0]?.filename;
 
+
     try {
       let userData = req.body;
 
@@ -415,7 +416,8 @@ const AuthController = {
         membership: user?.membership,
         card_number: user?.card_number,
         membership_id: user?.membership_id,
-        token : user?.token,
+        token: user?.token,
+        push_notification_option: user?.push_notification_option,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
       };
@@ -470,7 +472,8 @@ const AuthController = {
 
       user.membership_id = membership_id;
 
-      let emailPassword = password;
+      const emailPassword = password;
+
 
       const salt = await bcrypt.genSalt(10);
       const hashPassword = await bcrypt.hash(password, salt);
