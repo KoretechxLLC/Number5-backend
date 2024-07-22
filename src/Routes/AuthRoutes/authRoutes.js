@@ -28,12 +28,7 @@ authRoutes.put(
   AuthController.approvedUser
 );
 
-authRoutes.put(
-  "/block-user",
-  verifyAccessToken,
-  verifyAdminRole,
-  AuthController.blockedUser
-);
+
 
 authRoutes.post("/forgot-password", AuthController.forgotPassword);
 

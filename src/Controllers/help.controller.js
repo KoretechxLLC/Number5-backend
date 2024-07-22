@@ -2,6 +2,7 @@ const createError = require("http-errors");
 const { messageSchema } = require("../../helper/validation_schema");
 const UserModel = require("../Models/user.model");
 const HelpModel = require("../Models/message.model");
+const { sendEmail } = require("../../helper/send_email");
 
 const HelpController = {
   sendMessage: async (req, res, next) => {
@@ -28,7 +29,7 @@ const HelpController = {
         phone_number: user?.phone_number,
         address: user?.address,
         username: user?.username,
-      membership_id: user?.membership_id,
+        membership_id: user?.membership_id,
         userId: result?.id,
       });
 
@@ -43,8 +44,31 @@ const HelpController = {
       next(err);
     }
   },
+  reply_message: async (req, res, next) => {
+    try {
+      let { subject, message, email, id } = req.body;
+
+      if (!subject || !message || !email || !id)
+        throw createError.BadRequest("Required fields are missing");
+
+      await sendEmail(email, subject, message);
+
+      let helpReply = await HelpModel.findByIdAndUpdate(
+        id,
+        {
+          $set: { status: "replied" },
+        },
+        { new: true }
+      );
+
+      res.status(200).json({
+        message: "Email has been successfully send",
+        data: helpReply,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
 
-
-
-module.exports = HelpController
+module.exports = HelpController;
