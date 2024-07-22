@@ -20,7 +20,6 @@ const uploadShopImage = require("../../../utils/upload.shopImage");
 const router = express.Router();
 
 router.get("/get-user-data", verifyAccessToken, UserController.get);
-
 router.put(
   "/edit-user-data",
   verifyAccessToken,
@@ -29,12 +28,17 @@ router.put(
 );
 router.post("/send-message", verifyAccessToken, HelpController.sendMessage);
 router.post(
+  "/reply-message",
+  verifyAccessToken,
+  verifyAdminRole,
+  HelpController.reply_message
+);
+router.post(
   "/add-terms-and-conditions",
   verifyAccessToken,
   verifyAdminRole,
   TermsAndConditionsController.addTermsAndConditions
 );
-
 router.post(
   "/create-registration-type",
   verifyAccessToken,
@@ -42,8 +46,74 @@ router.post(
   uploadRegistrationImage.single("registrationImage"),
   RegistrationTypeController.createType
 );
-
 router.get("/get-registration-type", RegistrationTypeController.get);
+router.get(
+  "/get-users/:page/:size",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_users
+);
+router.get(
+  "/get-all-users-count",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_all_user_count
+);
+router.get(
+  "/get-active-users-count",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_active_user_count
+);
+
+router.get(
+  "/get-inactive-users-count",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_inactive_user_count
+);
+
+router.get(
+  "/get-pending-users-count",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_pending_user_count
+);
+
+router.get(
+  "/get-pending-users/:page/:size",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_pending_user
+);
+
+router.get(
+  "/get-approved-users/:page/:size",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_approved_user
+);
+
+router.get(
+  "/get-inactive-users/:page/:size",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_inactive_user
+);
+
+router.put(
+  "/change-status",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController?.change_status
+);
+
+router.put(
+  "/reject-user",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController?.reject_user
+);
 
 router.put(
   "/update-registration-type",

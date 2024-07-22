@@ -384,8 +384,8 @@ const AuthController = {
         throw createError?.Unauthorized("Your Profile is in pending");
       }
 
-      if (user?.user_status?.toLowerCase() == "blocked") {
-        throw createError?.Unauthorized("Your Profile has been blocked");
+      if (user?.user_status?.toLowerCase() == "inactive") {
+        throw createError?.Unauthorized("Your Profile has been inactived");
       }
 
       const accessToken = await signAccessToken(user.id);
@@ -531,29 +531,7 @@ const AuthController = {
       }
     }
   },
-  blockedUser: async (req, res, next) => {
-    try {
-      let { email } = req.body;
-
-      if (!email) throw createError.BadRequest();
-
-      let user = await UserModel.findOneAndUpdate(
-        { email: email },
-        { user_status: "blocked" },
-        { new: true }
-      );
-
-      if (!user) {
-        throw createError.NotFound("User not found");
-      }
-
-      res.status(200).json({
-        message: "User has been blocked successfully",
-      });
-    } catch (err) {
-      next(err);
-    }
-  },
+ 
   forgotPassword: async (req, res, next) => {
     try {
       const { email } = req.body;

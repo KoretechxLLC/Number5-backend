@@ -7,6 +7,7 @@ const {
 const path = require("path");
 const fs = require("fs");
 const MembershipModel = require("../Models/membership.model");
+const { sendEmail } = require("../../helper/send_email");
 
 const UserController = {
   get: async (req, res, next) => {
@@ -51,7 +52,7 @@ const UserController = {
         username: user?.username,
         profile_pic: user?.profile_pic,
         token: user?.token,
-        push_notification_option : user?.push_notification_option,
+        push_notification_option: user?.push_notification_option,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
       };
@@ -59,6 +60,35 @@ const UserController = {
       res.status(200).json({
         message: "User data successfully retrived",
         data: dataToSend,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_users: async (req, res, next) => {
+    try {
+      let page = parseInt(req.params.page);
+      let size = parseInt(req.params.size);
+
+      let query = {};
+
+      let users;
+
+      if (!page || !size || page <= 0 || size <= 0) {
+        // Retrieve all data
+        users = await UserModel.find(query);
+      } else {
+        let skip = (page - 1) * size;
+        let limit = size;
+        users = await UserModel.find(query).skip(skip).limit(limit);
+      }
+
+      if (!users || users.length == 0)
+        throw createError.NotFound("Users Not Found");
+
+      res.status(200).json({
+        message: "Users Retrieved Successfully",
+        data: users,
       });
     } catch (err) {
       next(err);
@@ -250,17 +280,208 @@ const UserController = {
       res.status(200).json({
         message: "Push Notification Option Successfully Updated",
       });
-
     } catch (err) {
       next(err);
     }
   },
+  get_all_user_count: async (req, res, next) => {
+    try {
+      let userCount = await UserModel.countDocuments({});
 
+      res.status(200).json({
+        message: "Users count successfully retreived",
+        data: userCount,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_active_user_count: async (req, res, next) => {
+    try {
+      let activeUserCount = await UserModel.countDocuments({
+        user_status: "approved",
+      });
 
+      res.status(200).json({
+        message: "Active users count successfully retrieved",
+        data: activeUserCount,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_inactive_user_count: async (req, res, next) => {
+    try {
+      let activeUserCount = await UserModel.countDocuments({
+        user_status: "inactive",
+      });
 
+      res.status(200).json({
+        message: "Inactive users count successfully retrieved",
+        data: activeUserCount,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_pending_user_count: async (req, res, next) => {
+    try {
+      let activeUserCount = await UserModel.countDocuments({
+        user_status: "pending",
+      });
+
+      res.status(200).json({
+        message: "Inactive users count successfully retrieved",
+        data: activeUserCount,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_pending_user: async (req, res, next) => {
+    try {
+      let page = parseInt(req.params.page);
+      let size = parseInt(req.params.size);
+
+      let query = { user_status: "pending" }; // Add condition for pending status
+
+      let users;
+
+      if (!page || !size || page <= 0 || size <= 0) {
+        // Retrieve all data
+        users = await UserModel.find(query);
+      } else {
+        let skip = (page - 1) * size;
+        let limit = size;
+        users = await UserModel.find(query).skip(skip).limit(limit);
+      }
+
+      if (!users || users.length == 0)
+        throw createError.NotFound("Users Not Found");
+
+      res.status(200).json({
+        message: "Users Retrieved Successfully",
+        data: users,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_approved_user: async (req, res, next) => {
+    try {
+      let page = parseInt(req.params.page);
+      let size = parseInt(req.params.size);
+
+      let query = { user_status: "approved" };
+
+      let users;
+
+      if (!page || !size || page <= 0 || size <= 0) {
+        // Retrieve all data
+        users = await UserModel.find(query);
+      } else {
+        let skip = (page - 1) * size;
+        let limit = size;
+        users = await UserModel.find(query).skip(skip).limit(limit);
+      }
+
+      if (!users || users.length == 0)
+        throw createError.NotFound("Users Not Found");
+
+      res.status(200).json({
+        message: "Users Retrieved Successfully",
+        data: users,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_inactive_user: async (req, res, next) => {
+    try {
+      let page = parseInt(req.params.page);
+      let size = parseInt(req.params.size);
+
+      let query = { user_status: "inactive" };
+
+      let users;
+
+      if (!page || !size || page <= 0 || size <= 0) {
+        // Retrieve all data
+        users = await UserModel.find(query);
+      } else {
+        let skip = (page - 1) * size;
+        let limit = size;
+        users = await UserModel.find(query).skip(skip).limit(limit);
+      }
+
+      if (!users || users.length == 0)
+        throw createError.NotFound("Users Not Found");
+
+      res.status(200).json({
+        message: "Users Retrieved Successfully",
+        data: users,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  change_status: async (req, res, next) => {
+    try {
+      let { email, status } = req.body;
+
+      if (!email || !status)
+        throw createError.BadRequest("Required fields are missing");
+
+      let user = await UserModel.findOneAndUpdate(
+        { email: email },
+        {
+          user_status:
+            status?.toLowerCase() == "active" ? "inactive" : "approved",
+        },
+        { new: true }
+      );
+
+      if (!user) {
+        throw createError.NotFound("User not found");
+      }
+
+      res.status(200).json({
+        message: `User has been ${
+          status?.toLowerCase() == "active" ? "inactived" : "approved"
+        } successfully`,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  reject_user: async (req, res, next) => {
+    try {
+      let { email } = req.body;
+
+      if (!email) throw createError.BadRequest("Required fields are missing");
+
+      let rejectUser = await UserModel.findOneAndUpdate(
+        { email: email },
+        { $set: { user_status: "rejected" } },
+        { new: true }
+      );
+
+      if (!rejectUser) throw createError.BadRequest("No User Found");
+
+      let subject = "Number 5 Club Registration Response";
+      let message =
+        "We regret to inform you that your profile has been rejected. For further details, please contact our support team.";
+
+      await sendEmail(email, subject, message);
+
+      res.status(200).json({
+        message: "User profile has been successfully rejected",
+        data: rejectUser,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
-
-
-
 
 module.exports = UserController;
