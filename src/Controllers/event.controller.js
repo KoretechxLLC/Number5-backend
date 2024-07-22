@@ -389,10 +389,10 @@ const EventController = {
       }
 
       if (todaySpecialFiles && todaySpecialFiles.length > 0) {
-        todaySpecialFiles.forEach((file, index) => {
+        todaySpecial.forEach((file, index) => {
           const destinationFolder = path.join(
             __dirname,
-            `../../public/eventImages/${file.filename}`
+            `../../public/eventImages/${file.image}`
           );
           fs.unlink(destinationFolder, (err) => {
             if (err) {

@@ -72,7 +72,6 @@ const ShopController = {
     try {
       const id = req.params.id;
 
-      console.log(id, "idddd");
 
       if (!id) {
         throw createError.BadRequest("Item ID is required");
@@ -115,8 +114,6 @@ const ShopController = {
       if (item_sizes) {
         item_sizes = JSON.parse(item_sizes);
       }
-
-      console.log(id,"idddd")
 
       if (!id) throw createError.BadRequest("Item Id is missing");
 

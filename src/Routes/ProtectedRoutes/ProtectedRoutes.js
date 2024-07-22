@@ -182,7 +182,6 @@ router.put(
 router.delete(
   "/delete-user/:id",
   verifyAccessToken,
-  verifyAdminRole,
   UserController.delete_user_account
 );
 
@@ -208,12 +207,7 @@ router.put(
   ShopController.update_item
 );
 
-
-router.get(
-  "/get-shop-item",
-  verifyAccessToken,
-  ShopController.get_item
-);
+router.get("/get-shop-item", verifyAccessToken, ShopController.get_item);
 router.put(
   "/update-shop-item",
   verifyAccessToken,

@@ -63,7 +63,7 @@ const BookingSchema = new mongoose.Schema({
     },
     payment_option : {
         type : String,
-        required : true
+        
     },
     is_fee_paid : {
         type : Boolean,
@@ -97,7 +97,7 @@ const BookingSchema = new mongoose.Schema({
     },
     total_amount : {
         type : Number,
-        required : true
+        
     }
 })
 

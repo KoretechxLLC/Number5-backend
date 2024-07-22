@@ -51,6 +51,7 @@ const UserController = {
         username: user?.username,
         profile_pic: user?.profile_pic,
         token: user?.token,
+        push_notification_option : user?.push_notification_option,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
       };
@@ -249,7 +250,6 @@ const UserController = {
       res.status(200).json({
         message: "Push Notification Option Successfully Updated",
       });
-
 
     } catch (err) {
       next(err);
