@@ -16,6 +16,7 @@ const EventBooking = require("../../Controllers/eventbooking.controller");
 const EventBookingController = require("../../Controllers/eventbooking.controller");
 const ShopController = require("../../Controllers/shop.controller");
 const uploadShopImage = require("../../../utils/upload.shopImage");
+const notificationController = require("../../Controllers/notificationController");
 
 const router = express.Router();
 
@@ -32,6 +33,12 @@ router.post(
   verifyAccessToken,
   verifyAdminRole,
   HelpController.reply_message
+);
+router.get(
+  "/get-messages/:page/:size",
+  verifyAccessToken,
+  verifyAdminRole,
+  HelpController.get_message
 );
 router.post(
   "/add-terms-and-conditions",
@@ -92,6 +99,13 @@ router.get(
   verifyAccessToken,
   verifyAdminRole,
   UserController.get_approved_user
+);
+
+router.post(
+  "/send-notification",
+  verifyAccessToken,
+  verifyAdminRole,
+  notificationController.send
 );
 
 router.get(

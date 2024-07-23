@@ -48,6 +48,12 @@ const MessageSchema = new Schema({
     type: String,
     default: "pending",
   },
+  admin_subject: {
+    type: String,
+  },
+  admin_message: {
+    type: String,
+  },
   created_at: {
     type: Date,
     default: Date.now,

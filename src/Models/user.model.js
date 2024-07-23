@@ -116,6 +116,10 @@ const UserSchema = new Schema({
   push_notification_option : {
     type : Boolean
   },
+  event_visits : {
+    type : Number,
+    default : 0
+  },
   created_at: {
     type: Date,
     default: Date.now,
