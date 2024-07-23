@@ -56,7 +56,11 @@ const HelpController = {
       let helpReply = await HelpModel.findByIdAndUpdate(
         id,
         {
-          $set: { status: "replied" },
+          $set: {
+            status: "replied",
+            admin_message: message,
+            admin_subject: subject,
+          },
         },
         { new: true }
       );
@@ -64,6 +68,35 @@ const HelpController = {
       res.status(200).json({
         message: "Email has been successfully send",
         data: helpReply,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_message: async (req, res, next) => {
+    try {
+      let page = parseInt(req.params.page);
+      let size = parseInt(req.params.size);
+
+      let query = {};
+
+      let helpers;
+
+      if (!page || !size || page <= 0 || size <= 0) {
+        // Retrieve all data
+        helpers = await HelpModel.find(query);
+      } else {
+        let skip = (page - 1) * size;
+        let limit = size;
+        helpers = await HelpModel.find(query).skip(skip).limit(limit);
+      }
+
+      if (!helpers || helpers.length == 0)
+        throw createError.NotFound("Data Not Found");
+
+      res.status(200).json({
+        message: "help Data Retrieved Successfully",
+        data: helpers,
       });
     } catch (err) {
       next(err);

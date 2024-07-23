@@ -417,6 +417,7 @@ const AuthController = {
         card_number: user?.card_number,
         membership_id: user?.membership_id,
         token: user?.token,
+        event_visits : user?.event_visits,
         push_notification_option: user?.push_notification_option,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,

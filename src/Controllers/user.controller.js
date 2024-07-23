@@ -52,6 +52,7 @@ const UserController = {
         username: user?.username,
         profile_pic: user?.profile_pic,
         token: user?.token,
+        event_visits: user?.event_visits,
         push_notification_option: user?.push_notification_option,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
@@ -85,6 +86,46 @@ const UserController = {
 
       if (!users || users.length == 0)
         throw createError.NotFound("Users Not Found");
+
+      users =
+        users &&
+        users.length > 0 &&
+        users.map((user, i) => {
+          return {
+            registration_type: user?.registration_type,
+            couples_type: user?.couples_type,
+            registration_fee: user?.registration_fee,
+            gender: user?.gender,
+            first_name: user?.first_name,
+            last_name: user?.last_name,
+            date_of_birth: user?.date_of_birth,
+            email: user?.email,
+            phone_number: user?.phone_number,
+            address: user?.address,
+            occupation: user?.occupation,
+            height: user?.height,
+            weight: user?.weight,
+            id: user?.id,
+            sexuality: user?.sexuality,
+            life_style: user?.life_style,
+            membership: user?.membership,
+            card_number: user?.card_number,
+            wanted_experience: user?.wanted_experience,
+            user_quality: user?.user_quality,
+            user_status: user?.user_status,
+            is_fee_paid: user?.is_fee_paid,
+            membership_id: user?.membership_id,
+            username: user?.username,
+            profile_pic: user?.profile_pic,
+            token: user?.token,
+            event_visits: user?.event_visits,
+            push_notification_option: user?.push_notification_option,
+            is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+            role: user?.role,
+          };
+        });
+
+        console.log(users,"users")
 
       res.status(200).json({
         message: "Users Retrieved Successfully",
@@ -359,6 +400,44 @@ const UserController = {
       if (!users || users.length == 0)
         throw createError.NotFound("Users Not Found");
 
+      users =
+        users &&
+        users.length > 0 &&
+        users.map((user, i) => {
+          return {
+            registration_type: user?.registration_type,
+            couples_type: user?.couples_type,
+            registration_fee: user?.registration_fee,
+            gender: user?.gender,
+            first_name: user?.first_name,
+            last_name: user?.last_name,
+            date_of_birth: user?.date_of_birth,
+            email: user?.email,
+            phone_number: user?.phone_number,
+            address: user?.address,
+            occupation: user?.occupation,
+            height: user?.height,
+            weight: user?.weight,
+            id: user?.id,
+            sexuality: user?.sexuality,
+            life_style: user?.life_style,
+            membership: user?.membership,
+            card_number: user?.card_number,
+            wanted_experience: user?.wanted_experience,
+            user_quality: user?.user_quality,
+            user_status: user?.user_status,
+            is_fee_paid: user?.is_fee_paid,
+            membership_id: user?.membership_id,
+            username: user?.username,
+            profile_pic: user?.profile_pic,
+            token: user?.token,
+            event_visits: user?.event_visits,
+            push_notification_option: user?.push_notification_option,
+            is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+            role: user?.role,
+          };
+        });
+
       res.status(200).json({
         message: "Users Retrieved Successfully",
         data: users,
@@ -388,6 +467,44 @@ const UserController = {
       if (!users || users.length == 0)
         throw createError.NotFound("Users Not Found");
 
+      users =
+        users &&
+        users.length > 0 &&
+        users.map((user, i) => {
+          return {
+            registration_type: user?.registration_type,
+            couples_type: user?.couples_type,
+            registration_fee: user?.registration_fee,
+            gender: user?.gender,
+            first_name: user?.first_name,
+            last_name: user?.last_name,
+            date_of_birth: user?.date_of_birth,
+            email: user?.email,
+            phone_number: user?.phone_number,
+            address: user?.address,
+            occupation: user?.occupation,
+            height: user?.height,
+            weight: user?.weight,
+            id: user?.id,
+            sexuality: user?.sexuality,
+            life_style: user?.life_style,
+            membership: user?.membership,
+            card_number: user?.card_number,
+            wanted_experience: user?.wanted_experience,
+            user_quality: user?.user_quality,
+            user_status: user?.user_status,
+            is_fee_paid: user?.is_fee_paid,
+            membership_id: user?.membership_id,
+            username: user?.username,
+            profile_pic: user?.profile_pic,
+            token: user?.token,
+            event_visits: user?.event_visits,
+            push_notification_option: user?.push_notification_option,
+            is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+            role: user?.role,
+          };
+        });
+
       res.status(200).json({
         message: "Users Retrieved Successfully",
         data: users,
@@ -416,6 +533,44 @@ const UserController = {
 
       if (!users || users.length == 0)
         throw createError.NotFound("Users Not Found");
+
+      users =
+        users &&
+        users.length > 0 &&
+        users.map((user, i) => {
+          return {
+            registration_type: user?.registration_type,
+            couples_type: user?.couples_type,
+            registration_fee: user?.registration_fee,
+            gender: user?.gender,
+            first_name: user?.first_name,
+            last_name: user?.last_name,
+            date_of_birth: user?.date_of_birth,
+            email: user?.email,
+            phone_number: user?.phone_number,
+            address: user?.address,
+            occupation: user?.occupation,
+            height: user?.height,
+            weight: user?.weight,
+            id: user?.id,
+            sexuality: user?.sexuality,
+            life_style: user?.life_style,
+            membership: user?.membership,
+            card_number: user?.card_number,
+            wanted_experience: user?.wanted_experience,
+            user_quality: user?.user_quality,
+            user_status: user?.user_status,
+            is_fee_paid: user?.is_fee_paid,
+            membership_id: user?.membership_id,
+            username: user?.username,
+            profile_pic: user?.profile_pic,
+            token: user?.token,
+            event_visits: user?.event_visits,
+            push_notification_option: user?.push_notification_option,
+            is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+            role: user?.role,
+          };
+        });
 
       res.status(200).json({
         message: "Users Retrieved Successfully",

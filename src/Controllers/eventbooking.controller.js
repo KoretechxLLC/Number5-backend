@@ -607,6 +607,8 @@ const EventBookingController = {
         user.membership.consumedPasses = user.membership.consumedPasses + 1;
         user.membership.remainingVisits = user.membership.remainingVisits - 1;
 
+        user.event_visits = user?.event_visits + 1;
+
         user.markModified("membership");
         await user.save({ session });
       }
