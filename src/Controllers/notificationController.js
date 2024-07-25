@@ -11,7 +11,6 @@ const notificationController = {
         throw createError.BadRequest("Required fields are missing");
 
       let token = await getAccessToken();
-
       if (!token) throw createError.InternalServerError();
 
       const headers = {
@@ -19,37 +18,46 @@ const notificationController = {
         Authorization: `Bearer ${token}`,
       };
 
-      let message;
-      if (usertoken) {
-        message = {
-          message: {
-            token: usertoken,
-            notification: {
-              title: "Test Title",
-              body: "Test Body",
+      if (Array.isArray(usertoken) && usertoken.length > 0) {
+        const notificationPromises = usertoken.map(async (user) => {
+          console.log(user, "userrsss");
+          const message = {
+            message: {
+              token: user,
+              notification: {
+                title: "Test Title",
+                body: "Test Body",
+              },
             },
-          },
-        };
+          };
+          return axios.post(
+            "https://fcm.googleapis.com/v1/projects/number-5-2ec37/messages:send",
+            message,
+            { headers }
+          );
+        });
+
+        await Promise.all(notificationPromises);
       } else {
-        message = {
+        const message = {
           message: {
-            topic: "all_devices",
+            topic: topic || "all_devices",
             notification: {
               title: title,
               body: body,
             },
           },
         };
+
+        await axios.post(
+          "https://fcm.googleapis.com/v1/projects/number-5-2ec37/messages:send",
+          message,
+          { headers }
+        );
       }
 
-      let response = await axios.post(
-        "https://fcm.googleapis.com/v1/projects/number-5-2ec37/messages:send",
-        message,
-        { headers }
-      );
-
       res.status(200).json({
-        message: "Notification successfully send",
+        message: "Notification successfully sent",
       });
     } catch (err) {
       next(err);

@@ -15,7 +15,10 @@ const EventController = {
         event_start_time,
         event_end_time,
         event_date,
-        event_ticket_price,
+        event_regular_single_price,
+        event_regular_couple_price,
+        event_premium_single_price,
+        event_premium_couple_price,
         latitude,
         longitude,
         event_description,
@@ -29,12 +32,14 @@ const EventController = {
         !event_start_time ||
         !event_end_time ||
         !event_date ||
-        !event_ticket_price ||
+        !event_regular_single_price ||
+        !event_regular_couple_price ||
+        !event_premium_single_price ||
+        !event_premium_couple_price ||
         !latitude ||
         !longitude ||
         !event_description ||
-        !event_sop ||
-        !event_couple_ticket_price
+        !event_sop
       ) {
         throw createError.BadRequest("Required fields are missing");
       }
@@ -242,8 +247,10 @@ const EventController = {
         event_start_time,
         event_end_time,
         event_date,
-        event_ticket_price,
-        event_couple_ticket_price,
+        event_regular_single_price,
+        event_regular_couple_price,
+        event_premium_single_price,
+        event_premium_couple_price,
         latitude,
         longitude,
         event_description,
@@ -257,12 +264,14 @@ const EventController = {
         !event_start_time ||
         !event_end_time ||
         !event_date ||
-        !event_ticket_price ||
         !latitude ||
         !longitude ||
         !event_description ||
         !event_sop ||
-        !event_couple_ticket_price ||
+        !event_regular_single_price ||
+        !event_regular_couple_price ||
+        !event_premium_single_price ||
+        !event_premium_couple_price ||
         !id
       ) {
         throw createError.BadRequest("Required fields are missing");

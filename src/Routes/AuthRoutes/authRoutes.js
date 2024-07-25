@@ -17,6 +17,8 @@ authRoutes.post(
 
 authRoutes.post("/login", AuthController.login);
 
+authRoutes.post("/checkAuth", AuthController.checkUserEmailAndPhoneNumber);
+
 authRoutes.post("/refresh-token", AuthController.refreshToken);
 
 authRoutes.delete("/sign-out/:token", AuthController.signout);
@@ -27,8 +29,6 @@ authRoutes.put(
   verifyAdminRole,
   AuthController.approvedUser
 );
-
-
 
 authRoutes.post("/forgot-password", AuthController.forgotPassword);
 

@@ -8,6 +8,7 @@ const path = require("path");
 const fs = require("fs");
 const MembershipModel = require("../Models/membership.model");
 const { sendEmail } = require("../../helper/send_email");
+const bcrypt = require("bcrypt");
 
 const UserController = {
   get: async (req, res, next) => {
@@ -125,7 +126,7 @@ const UserController = {
           };
         });
 
-        console.log(users,"users")
+      console.log(users, "users");
 
       res.status(200).json({
         message: "Users Retrieved Successfully",
@@ -632,6 +633,42 @@ const UserController = {
       res.status(200).json({
         message: "User profile has been successfully rejected",
         data: rejectUser,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  changeAdminPassword: async (req, res, next) => {
+    try {
+      let { currentPassword, newPassword, confirmPassword, id } = req.body;
+
+      if (!currentPassword || newPassword || !confirmPassword)
+        throw createError.BadRequest("Required fields are missing");
+
+      if (newPassword !== confirmPassword)
+        throw createError.BadRequest("Confirm Password is not matching");
+
+      let user = await UserModel.findById(id);
+
+      if (!user) throw createError.BadRequest("User not found");
+
+      if (user.role?.toLowerCase() !== "admin")
+        throw createError.Unauthorized("Unauthorized");
+
+      let checkPassword = await user.isValidPassword(result?.password);
+
+      if (!checkPassword)
+        throw createError.BadRequest("Invalid Current Password");
+
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(newPassword, salt);
+
+      user.password = hashPassword;
+
+      await user.save();
+
+      res.status(200).json({
+        message: "Password updated successfully",
       });
     } catch (err) {
       next(err);

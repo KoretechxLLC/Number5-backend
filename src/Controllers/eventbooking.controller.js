@@ -6,7 +6,6 @@ const path = require("path");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const { PDFDocument, rgb } = require("pdf-lib");
-const puppeteer = require("puppeteer");
 const fontkit = require("@pdf-lib/fontkit");
 const {
   sendEmailWithAttachment,
@@ -40,7 +39,7 @@ async function generatePDF(data) {
     x: 0,
     y: 0,
     width: 200,
-    height: 260,
+    height: 270,
     borderRadius: 10,
     borderColor: rgb(0.08, 0.2, 0.12),
     borderWidth: 2,
@@ -51,7 +50,7 @@ async function generatePDF(data) {
     x: 0,
     y: 0,
     width: 200,
-    height: 260,
+    height: 270,
   });
 
   const eventTicketText = "Event Ticket";
@@ -64,27 +63,45 @@ async function generatePDF(data) {
 
   page.drawText(eventTicketText, {
     x: eventTicketX,
-    y: 230,
+    y: 240,
     size: eventTicketSize,
     color: rgb(1, 1, 1),
   });
 
-  const sections = [
-    { label: "Name:", value: data.username, y: 200 },
-    { label: "Membership Type:", value: data.membership_type, y: 175 },
-    { label: "Ticket Type:", value: data.ticket_type, y: 150 },
-    { label: "Event Name:", value: data.event_name, y: 125 },
-    { label: "Date:", value: data.event_date, y: 100 },
-    { label: "Event Time:", value: data.event_start_time, y: 75 },
-    { label: "No. of guests:", value: data.no_of_guests, y: 50 },
-    {
-      label: "Amount:",
-      value: `${
-        data?.payment_option?.toLowerCase() == "cash" ? "Pay at Venue" : "Paid"
-      } £${data.amount}`,
-      y: 25,
-    },
-  ];
+  let sections = [];
+
+  if (Number(data?.amount) > 0) {
+    sections = [
+      { label: "Name:", value: data.username, y: 225 },
+      { label: "Membership Type:", value: data.membership_type, y: 200 },
+      { label: "Ticket Type:", value: data.ticket_type, y: 175 },
+      { label: "Event Name:", value: data.event_name, y: 150 },
+      { label: "Date:", value: data.event_date, y: 125 },
+      { label: "Event Time:", value: data.event_start_time, y: 100 },
+      { label: "Arrival Time:", value: data.arrivalTime, y: 75 },
+      { label: "No. of guests:", value: data.no_of_guests.toString(), y: 50 },
+      {
+        label: "Amount:",
+        value: `${
+          data?.payment_option?.toLowerCase() == "cash"
+            ? "Pay at Venue"
+            : "Paid"
+        } $${data.amount}`,
+        y: 25,
+      },
+    ];
+  } else {
+    sections = [
+      { label: "Name:", value: data.username, y: 200 },
+      { label: "Membership Type:", value: data.membership_type, y: 175 },
+      { label: "Ticket Type:", value: data.ticket_type, y: 150 },
+      { label: "Event Name:", value: data.event_name, y: 125 },
+      { label: "Date:", value: data.event_date, y: 100 },
+      { label: "Event Time:", value: data.event_start_time, y: 75 },
+      { label: "Arrival Time:", value: data.arrivalTime, y: 50 },
+      { label: "No. of guests:", value: data.no_of_guests.toString(), y: 25 },
+    ];
+  }
 
   const marginBottom = 10;
 
@@ -180,8 +197,6 @@ const EventBookingController = {
       if (!arrival_time)
         throw createError.BadRequest("Arrival Time is missing");
 
-      // if (!amount) throw createError.BadRequest("Amount is missing");
-
       if (
         Number(no_of_guests) > 0 &&
         guest_details.length !== Number(no_of_guests)
@@ -191,9 +206,6 @@ const EventBookingController = {
 
       if (!selected_booking_type)
         throw createError.BadRequest("Booking type is missing");
-
-      // if (!payment_option)
-      //   throw createError.BadRequest("Payment Option is missing");
 
       let checkBookings = await BookingModel.find({
         eventId: event_id,
@@ -256,7 +268,14 @@ const EventBookingController = {
             return eventDate > currentDate;
           });
 
-          if (onwardBookings.length >= user.membership?.remainingVisits) {
+          let membershipBooking = bookings?.filter((e, i) => {
+            return (
+              e?.selected_booking_type?.membership ==
+              user?.membership?.package_name
+            );
+          });
+
+          if (membershipBooking.length >= user.membership?.remainingVisits) {
             throw createError.NotAcceptable(
               "You cannot book event more than your remaining passes"
             );
@@ -290,6 +309,7 @@ const EventBookingController = {
         event_date: new Date(event.event_date).toLocaleDateString(),
         event_start_time: event.event_start_time,
         ticket_type: selected_booking_type?.type,
+        arrivalTime: arrival_time,
         no_of_guests: no_of_guests,
         event_name: event?.event_name,
         payment_option: payment_option ? payment_option : "Paid",
@@ -326,25 +346,19 @@ const EventBookingController = {
             session
           );
 
-          if (!partnerData) throw createError.NotFound("Partner Not Found");
+          // if (!partnerData) throw createError.NotFound("Partner Not Found");
+          if (partnerData) {
+            let partnerEmail = partnerData?.email;
 
-          let partnerEmail = partnerData?.email;
-
-          await sendEmailWithAttachment(
-            partnerEmail,
-            subject,
-            message,
-            pdfPath
-          );
+            await sendEmailWithAttachment(
+              partnerEmail,
+              subject,
+              message,
+              pdfPath
+            );
+          }
         }
-
-        //   fs.unlink(pdfPath, (err) => {
-        //     if (err) {
-        //       console.error("Error deleting PDF:", err);
-        //     }
-        //   });
       }
-
       await session.commitTransaction();
       session.endSession();
 
@@ -437,6 +451,9 @@ const EventBookingController = {
     }
   },
   changeArrivalTime: async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
       let { bookingId, arrivalTime } = req.body;
 
@@ -446,11 +463,76 @@ const EventBookingController = {
 
       let updatedBooking = await BookingModel.findByIdAndUpdate(
         bookingId,
-        {
-          $set: { arrival_time: arrivalTime },
-        },
-        { new: true }
+        { $set: { arrival_time: arrivalTime } },
+        { new: true, session }
       );
+
+      if (!updatedBooking) throw createError.NotFound("Booking Not Found");
+
+      let user = updatedBooking?.user_data;
+      let event = updatedBooking?.event_data;
+      let guest_details = updatedBooking?.guest_details;
+      let selected_booking_type = updatedBooking?.selected_booking_type;
+      let no_of_guests = updatedBooking?.no_of_guests;
+      let payment_option = updatedBooking?.payment_option;
+      let amount = updatedBooking?.total_amount;
+
+      let dataToSend = {
+        username: user.first_name + " " + user?.last_name,
+        membership_type: user.membership.package_name,
+        event_date: new Date(event.event_date).toLocaleDateString(),
+        event_start_time: event.event_start_time,
+        ticket_type: selected_booking_type?.type,
+        arrivalTime: arrivalTime,
+        no_of_guests: no_of_guests,
+        event_name: event?.event_name,
+        payment_option: payment_option ? payment_option : "Paid",
+        amount: amount ?? 0,
+      };
+
+      console.log(dataToSend, "dataToSend");
+
+      pdfPath = await generatePDF(dataToSend);
+
+      console.log(pdfPath, "pathhh");
+
+      if (pdfPath) {
+        let subject = "Event Ticket";
+        let message = "This is the event ticket";
+
+        guest_details &&
+          guest_details.length > 0 &&
+          guest_details.map(async (guest) => {
+            let email = guest.email;
+            await sendEmailWithAttachment(email, subject, message, pdfPath);
+          });
+
+        let email = user.email;
+        await sendEmailWithAttachment(email, subject, message, pdfPath);
+
+        if (user?.registration_type == "couples") {
+          let partner_ref = user.partner_ref;
+
+          let partnerData = await UserModel.findById(partner_ref).session(
+            session
+          );
+
+          // if (!partnerData) throw createError.NotFound("Partner Not Found");
+          if (partnerData) {
+            let partnerEmail = partnerData?.email;
+
+            await sendEmailWithAttachment(
+              partnerEmail,
+              subject,
+              message,
+              pdfPath
+            );
+          }
+        }
+      }
+
+      await session.commitTransaction();
+      session.endSession();
 
       if (updatedBooking) {
         res.status(200).json({
@@ -464,6 +546,8 @@ const EventBookingController = {
         });
       }
     } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
       next(err);
     }
   },
@@ -512,9 +596,11 @@ const EventBookingController = {
           const coupleData = await UserModel.findById(coupleId).session(
             session
           );
-          const coupleEmail = coupleData.email;
 
-          await sendEmail(coupleEmail, subject, message);
+          if (coupleData) {
+            const coupleEmail = coupleData.email;
+            await sendEmail(coupleEmail, subject, message);
+          }
         }
 
         await session.commitTransaction();
@@ -604,9 +690,18 @@ const EventBookingController = {
           );
         }
 
-        user.membership.consumedPasses = user.membership.consumedPasses + 1;
-        user.membership.remainingVisits = user.membership.remainingVisits - 1;
-
+        if (
+          bookingSelectedType?.toLowerCase() !==
+            "regular pay as you go single" &&
+          bookingSelectedType?.toLowerCase() !==
+            "premium pay as you go single" &&
+          bookingSelectedType?.toLowerCase() !==
+            "regular pay as you go couple" &&
+          bookingSelectedType?.toLowerCase() !== "premium pay as you go couple"
+        ) {
+          user.membership.consumedPasses = user.membership.consumedPasses + 1;
+          user.membership.remainingVisits = user.membership.remainingVisits - 1;
+        }
         user.event_visits = user?.event_visits + 1;
 
         user.markModified("membership");
