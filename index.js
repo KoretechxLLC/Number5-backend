@@ -45,7 +45,6 @@ app.use(
   express.static(path.join(__dirname, "public", "shopItemImages"))
 );
 
-
 app.use(
   "/PDF",
   express.static(path.join(__dirname, "public", "PDF"))

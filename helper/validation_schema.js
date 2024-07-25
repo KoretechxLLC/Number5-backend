@@ -133,8 +133,10 @@ const EventSchema = joi.object({
   longitude: joi.number().required(),
   event_description: joi.string().max(1000).required(),
   event_sop: joi.array().required(),
-  event_ticket_price: joi.number().required(),
-  event_couple_ticket_price : joi.number().required(),
+  event_regular_single_price : joi.number().required(),
+  event_regular_couple_price : joi.number().required(),
+  event_premium_single_price : joi.number().required(),
+  event_premium_couple_price : joi.number().required(),
   event_pic: joi.string().required(),
   id: joi.string(),
   todaySpecial : joi.array()

@@ -38,7 +38,6 @@ const AuthController = {
     let profileImageName = profileImage?.[0]?.filename;
     let partnerImageName = partnerImage?.[0]?.filename;
 
-
     try {
       let userData = req.body;
 
@@ -63,7 +62,6 @@ const AuthController = {
         is_agree_terms_and_conditions,
       } = userData;
 
-
       if (!profileImageName)
         throw createError.BadRequest(
           `Invalid ${
@@ -75,6 +73,8 @@ const AuthController = {
 
       if (registration_type?.toLowerCase() === "couples" && !partnerImageName)
         throw createError.BadRequest("Invalid Member2 Profile Image");
+
+      console.log(req.body, "bodyyyy");
 
       if (
         !registration_type ||
@@ -353,6 +353,35 @@ const AuthController = {
       next(err);
     }
   },
+  checkUserEmailAndPhoneNumber: async (req, res, next) => {
+    try {
+      let { email, phone_number } = req.body;
+
+      if (!email || !phone_number)
+        throw createError.BadRequest("Required fields are missing");
+
+      let isEmailExists = await UserModel.findOne({ email: email });
+
+      if (isEmailExists) throw createError.BadRequest("Email already exists");
+
+
+      phone_number = phone_number?.split(" ").join("");
+
+      let isPhoneNumberExists = await UserModel.findOne({
+        phone_number: phone_number,
+      });
+
+      if (isPhoneNumberExists)
+        throw createError.BadRequest("Phone number already exists");
+
+      res.status(200).json({
+        message: "Username and password not registered",
+      });
+    } catch (err) {
+      next(err);
+    } 
+  },
+
   login: async (req, res, next) => {
     try {
       let { username, password } = req.body;
@@ -417,7 +446,7 @@ const AuthController = {
         card_number: user?.card_number,
         membership_id: user?.membership_id,
         token: user?.token,
-        event_visits : user?.event_visits,
+        event_visits: user?.event_visits,
         push_notification_option: user?.push_notification_option,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
         role: user?.role,
@@ -475,7 +504,6 @@ const AuthController = {
 
       const emailPassword = password;
 
-
       const salt = await bcrypt.genSalt(10);
       const hashPassword = await bcrypt.hash(password, salt);
       password = hashPassword;
@@ -532,7 +560,7 @@ const AuthController = {
       }
     }
   },
- 
+
   forgotPassword: async (req, res, next) => {
     try {
       const { email } = req.body;

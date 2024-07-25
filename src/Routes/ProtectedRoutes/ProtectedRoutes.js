@@ -300,4 +300,10 @@ router.put(
   ShopController.update_item
 );
 
+router.put(
+  "/change-admin-password",
+  verifyAccessToken,
+  UserController.changeAdminPassword
+);
+
 module.exports = router;

@@ -19,7 +19,6 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "googleapis": "^140.0.1",
-    "html-pdf": "^3.0.1",
     "http-errors": "^2.0.0",
     "joi": "^17.13.1",
     "jsonwebtoken": "^9.0.2",
@@ -29,8 +28,6 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.13",
     "pdf-lib": "^1.17.1",
-    "pdf-puppeteer": "^1.1.11",
-    "puppeteer": "^22.11.2",
     "qrcode": "^1.5.3",
     "redis": "^4.6.14"
   }
