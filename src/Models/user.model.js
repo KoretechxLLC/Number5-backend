@@ -44,7 +44,31 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  country: {
+    type: String,
+    required: true,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  postalCode: {
+    type: String,
+    required: true,
+  },
   occupation: {
+    type: String,
+    required: true,
+  },
+  hobbies: {
+    type: String,
+    required: true,
+  },
+  interest: {
+    type: String,
+    required: true,
+  },
+  ethnicity: {
     type: String,
     required: true,
   },

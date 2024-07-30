@@ -15,6 +15,12 @@ authRoutes.post(
   AuthController.registerUser
 );
 
+authRoutes.post(
+  "/inperson-registration",
+  uploadProfileImage.single("profileImage"),
+  AuthController.inPersonRegistration
+);
+
 authRoutes.post("/login", AuthController.login);
 
 authRoutes.post("/checkAuth", AuthController.checkUserEmailAndPhoneNumber);
@@ -24,7 +30,7 @@ authRoutes.post("/refresh-token", AuthController.refreshToken);
 authRoutes.delete("/sign-out/:token", AuthController.signout);
 
 authRoutes.put(
-  "/approved-user",
+  "/approved-user ",
   verifyAccessToken,
   verifyAdminRole,
   AuthController.approvedUser

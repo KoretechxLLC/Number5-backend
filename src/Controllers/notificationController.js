@@ -20,13 +20,12 @@ const notificationController = {
 
       if (Array.isArray(usertoken) && usertoken.length > 0) {
         const notificationPromises = usertoken.map(async (user) => {
-          console.log(user, "userrsss");
           const message = {
             message: {
               token: user,
               notification: {
-                title: "Test Title",
-                body: "Test Body",
+                title: title,
+                body: body,
               },
             },
           };
