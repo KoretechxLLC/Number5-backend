@@ -220,11 +220,11 @@ const EventController = {
 
       if (!page || !size || page <= 0 || size <= 0) {
         // Retrieve all data
-        events = await EventModel.find(query);
+        events = await EventModel.find(query).sort({ event_date: -1 });
       } else {
         let skip = (page - 1) * size;
         let limit = size;
-        events = await EventModel.find(query).skip(skip).limit(limit);
+        events = await EventModel.find(query).skip(skip).limit(limit).sort({ event_date: -1 });
       }
 
       if (!events || events.length == 0)
@@ -503,6 +503,18 @@ const EventController = {
       res.status(200).json({
         message: "Event Successfully Deleted",
         data: event,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  getEventsCounts: async (req, res, next) => {
+    try {
+      let eventCount = await EventModel.countDocuments({});
+
+      res.status(200).json({
+        message: "Events count successfully retreived",
+        data: eventCount,
       });
     } catch (err) {
       next(err);

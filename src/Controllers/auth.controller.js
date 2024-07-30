@@ -26,8 +26,84 @@ const path = require("path");
 const fs = require("fs");
 const MembershipModel = require("../Models/membership.model");
 const bcrypt = require("bcrypt");
+const InpersonRegistrationModel = require("../Models/inperson.registration.model");
 
 const AuthController = {
+  inPersonRegistration: async (req, res, next) => {
+    let filename = req?.file?.filename;
+
+    try {
+      let {
+        first_name,
+        last_name,
+        phone_number,
+        message,
+        date,
+        time,
+        registration_type,
+      } = req.body;
+
+      if (
+        !first_name ||
+        !last_name ||
+        !phone_number ||
+        !message ||
+        !date ||
+        !time ||
+        !registration_type ||
+        !filename
+      )
+        throw createError.BadRequest("Required fields are missing");
+
+      let checkNumber = await UserModel.findOne({ phone_number: phone_number });
+
+      if (checkNumber)
+        throw createError.BadRequest("Phone number already exists");
+
+      let checkNumberInPerson = await InpersonRegistrationModel.findOne({
+        phone_number: phone_number,
+      });
+
+      if (checkNumberInPerson)
+        throw createError.BadRequest("Phone number already exists");
+
+      console.log(filename, "filename");
+
+      let dataToSend = {
+        first_name: first_name,
+        last_name: last_name,
+        phone_number: phone_number,
+        date: date,
+        time: time,
+        registration_type: registration_type,
+        profile_pic: filename,
+        message: message,
+      };
+
+      let userData = await InpersonRegistrationModel.create(dataToSend);
+
+      res.status(200).json({
+        message: "Form Successfully submitted",
+        status: true,
+        data: userData,
+      });
+    } catch (err) {
+      if (filename) {
+        const destinationFolder = path.join(
+          __dirname,
+          `../../public/profileImages/${filename}`
+        );
+        fs.unlink(destinationFolder, (err) => {
+          if (err) {
+            console.error("error deleting picture");
+          }
+        });
+      }
+
+      next(err);
+    }
+  },
+
   registerUser: async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -50,6 +126,12 @@ const AuthController = {
         date_of_birth,
         email,
         phone_number,
+        country,
+        city,
+        postalCode,
+        ethnicity,
+        interest,
+        hobbies,
         address,
         occupation,
         height,
@@ -74,8 +156,6 @@ const AuthController = {
       if (registration_type?.toLowerCase() === "couples" && !partnerImageName)
         throw createError.BadRequest("Invalid Member2 Profile Image");
 
-      console.log(req.body, "bodyyyy");
-
       if (
         !registration_type ||
         !gender ||
@@ -86,6 +166,12 @@ const AuthController = {
         !phone_number ||
         !address ||
         !occupation ||
+        !interest ||
+        !hobbies ||
+        !ethnicity ||
+        !country ||
+        !city ||
+        !postalCode ||
         !height ||
         !weight ||
         !sexuality ||
@@ -161,6 +247,12 @@ const AuthController = {
           phone_number,
           address,
           occupation,
+          country,
+          city,
+          postalCode,
+          ethnicity,
+          interest,
+          hobbies,
           height,
           weight,
           sexuality,
@@ -180,6 +272,12 @@ const AuthController = {
           !phone_number ||
           !address ||
           !occupation ||
+          !interest ||
+          !hobbies ||
+          !ethnicity ||
+          !country ||
+          !city ||
+          !postalCode ||
           !height ||
           !weight ||
           !sexuality ||
@@ -234,6 +332,12 @@ const AuthController = {
           registration_type: partnerData?.registration_type,
           couples_type: partnerData?.couples_type,
           registration_fee: partnerData?.registration_fee,
+          ethnicity: partnerData?.ethnicity,
+          interest: partnerData?.interest,
+          hobbies: partnerData?.hobbies,
+          country: partnerData?.country,
+          city: partnerData?.city,
+          postalCode: partnerData?.postalCode,
           gender: partnerData?.gender,
           date_of_birth: partnerData?.date_of_birth,
           phone_number: partnerData?.phone_number,
@@ -267,6 +371,12 @@ const AuthController = {
         date_of_birth: result?.date_of_birth,
         phone_number: result?.phone_number,
         address: result?.address,
+        ethnicity: result?.ethnicity,
+        interest: result?.interest,
+        hobbies: result?.hobbies,
+        country: result?.country,
+        city: result?.city,
+        postalCode: result?.postalCode,
         occupation: result?.occupation,
         height: result?.height,
         weight: result?.weight,
@@ -364,7 +474,6 @@ const AuthController = {
 
       if (isEmailExists) throw createError.BadRequest("Email already exists");
 
-
       phone_number = phone_number?.split(" ").join("");
 
       let isPhoneNumberExists = await UserModel.findOne({
@@ -379,7 +488,7 @@ const AuthController = {
       });
     } catch (err) {
       next(err);
-    } 
+    }
   },
 
   login: async (req, res, next) => {
@@ -414,7 +523,9 @@ const AuthController = {
       }
 
       if (user?.user_status?.toLowerCase() == "inactive") {
-        throw createError?.Unauthorized("Your Profile has been inactived");
+        throw createError?.Unauthorized(
+          "Your account has been blocked. Contact support for details."
+        );
       }
 
       const accessToken = await signAccessToken(user.id);
@@ -437,6 +548,12 @@ const AuthController = {
         id: user?.id,
         sexuality: user?.sexuality,
         life_style: user?.life_style,
+        ethnicity: user?.ethnicity,
+        interest: user?.interest,
+        hobbies: user?.hobbies,
+        country: user?.country,
+        city: user?.city,
+        postalCode: user?.postalCode,
         wanted_experience: user?.wanted_experience,
         user_quality: user?.user_quality,
         user_status: user?.user_status,

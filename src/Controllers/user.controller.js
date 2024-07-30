@@ -42,6 +42,12 @@ const UserController = {
         weight: user?.weight,
         id: user?.id,
         sexuality: user?.sexuality,
+        ethnicity: user?.ethnicity,
+        interest: user?.interest,
+        hobbies: user?.hobbies,
+        country: user?.country,
+        city: user?.city,
+        postalCode: user?.postalCode,
         life_style: user?.life_style,
         membership: user?.membership,
         card_number: user?.card_number,
@@ -77,56 +83,60 @@ const UserController = {
       let users;
 
       if (!page || !size || page <= 0 || size <= 0) {
-        // Retrieve all data
-        users = await UserModel.find(query);
+        // Retrieve all data sorted in descending order
+        users = await UserModel.find(query).sort({ created_at: -1 });
       } else {
         let skip = (page - 1) * size;
         let limit = size;
-        users = await UserModel.find(query).skip(skip).limit(limit);
+        users = await UserModel.find(query)
+          .skip(skip)
+          .limit(limit)
+          .sort({ created_at: -1 });
       }
 
       if (!users || users.length == 0)
         throw createError.NotFound("Users Not Found");
 
-      users =
-        users &&
-        users.length > 0 &&
-        users.map((user, i) => {
-          return {
-            registration_type: user?.registration_type,
-            couples_type: user?.couples_type,
-            registration_fee: user?.registration_fee,
-            gender: user?.gender,
-            first_name: user?.first_name,
-            last_name: user?.last_name,
-            date_of_birth: user?.date_of_birth,
-            email: user?.email,
-            phone_number: user?.phone_number,
-            address: user?.address,
-            occupation: user?.occupation,
-            height: user?.height,
-            weight: user?.weight,
-            id: user?.id,
-            sexuality: user?.sexuality,
-            life_style: user?.life_style,
-            membership: user?.membership,
-            card_number: user?.card_number,
-            wanted_experience: user?.wanted_experience,
-            user_quality: user?.user_quality,
-            user_status: user?.user_status,
-            is_fee_paid: user?.is_fee_paid,
-            membership_id: user?.membership_id,
-            username: user?.username,
-            profile_pic: user?.profile_pic,
-            token: user?.token,
-            event_visits: user?.event_visits,
-            push_notification_option: user?.push_notification_option,
-            is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
-            role: user?.role,
-          };
-        });
-
-      console.log(users, "users");
+      users = users.map((user) => {
+        return {
+          registration_type: user?.registration_type,
+          couples_type: user?.couples_type,
+          registration_fee: user?.registration_fee,
+          gender: user?.gender,
+          first_name: user?.first_name,
+          last_name: user?.last_name,
+          date_of_birth: user?.date_of_birth,
+          email: user?.email,
+          phone_number: user?.phone_number,
+          address: user?.address,
+          occupation: user?.occupation,
+          height: user?.height,
+          weight: user?.weight,
+          id: user?.id,
+          ethnicity: user?.ethnicity,
+          interest: user?.interest,
+          hobbies: user?.hobbies,
+          country: user?.country,
+          city: user?.city,
+          postalCode: user?.postalCode,
+          sexuality: user?.sexuality,
+          life_style: user?.life_style,
+          membership: user?.membership,
+          card_number: user?.card_number,
+          wanted_experience: user?.wanted_experience,
+          user_quality: user?.user_quality,
+          user_status: user?.user_status,
+          is_fee_paid: user?.is_fee_paid,
+          membership_id: user?.membership_id,
+          username: user?.username,
+          profile_pic: user?.profile_pic,
+          token: user?.token,
+          event_visits: user?.event_visits,
+          push_notification_option: user?.push_notification_option,
+          is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+          role: user?.role,
+        };
+      });
 
       res.status(200).json({
         message: "Users Retrieved Successfully",
@@ -391,11 +401,14 @@ const UserController = {
 
       if (!page || !size || page <= 0 || size <= 0) {
         // Retrieve all data
-        users = await UserModel.find(query);
+        users = await UserModel.find(query).sort({ created_at: -1 });
       } else {
         let skip = (page - 1) * size;
         let limit = size;
-        users = await UserModel.find(query).skip(skip).limit(limit);
+        users = await UserModel.find(query)
+          .skip(skip)
+          .limit(limit)
+          .sort({ created_at: -1 });
       }
 
       if (!users || users.length == 0)
@@ -415,6 +428,12 @@ const UserController = {
             date_of_birth: user?.date_of_birth,
             email: user?.email,
             phone_number: user?.phone_number,
+            ethnicity: user?.ethnicity,
+            interest: user?.interest,
+            hobbies: user?.hobbies,
+            country: user?.country,
+            city: user?.city,
+            postalCode: user?.postalCode,
             address: user?.address,
             occupation: user?.occupation,
             height: user?.height,
@@ -458,11 +477,14 @@ const UserController = {
 
       if (!page || !size || page <= 0 || size <= 0) {
         // Retrieve all data
-        users = await UserModel.find(query);
+        users = await UserModel.find(query).sort({ created_at: -1 });
       } else {
         let skip = (page - 1) * size;
         let limit = size;
-        users = await UserModel.find(query).skip(skip).limit(limit);
+        users = await UserModel.find(query)
+          .skip(skip)
+          .limit(limit)
+          .sort({ created_at: -1 });
       }
 
       if (!users || users.length == 0)
@@ -485,6 +507,12 @@ const UserController = {
             address: user?.address,
             occupation: user?.occupation,
             height: user?.height,
+            ethnicity: user?.ethnicity,
+            interest: user?.interest,
+            hobbies: user?.hobbies,
+            country: user?.country,
+            city: user?.city,
+            postalCode: user?.postalCode,
             weight: user?.weight,
             id: user?.id,
             sexuality: user?.sexuality,
@@ -525,11 +553,14 @@ const UserController = {
 
       if (!page || !size || page <= 0 || size <= 0) {
         // Retrieve all data
-        users = await UserModel.find(query);
+        users = await UserModel.find(query).sort({ created_at: -1 });
       } else {
         let skip = (page - 1) * size;
         let limit = size;
-        users = await UserModel.find(query).skip(skip).limit(limit);
+        users = await UserModel.find(query)
+          .skip(skip)
+          .limit(limit)
+          .sort({ created_at: -1 });
       }
 
       if (!users || users.length == 0)
@@ -553,6 +584,12 @@ const UserController = {
             occupation: user?.occupation,
             height: user?.height,
             weight: user?.weight,
+            ethnicity: user?.ethnicity,
+            interest: user?.interest,
+            hobbies: user?.hobbies,
+            country: user?.country,
+            city: user?.city,
+            postalCode: user?.postalCode,
             id: user?.id,
             sexuality: user?.sexuality,
             life_style: user?.life_style,
@@ -642,7 +679,7 @@ const UserController = {
     try {
       let { currentPassword, newPassword, confirmPassword, id } = req.body;
 
-      if (!currentPassword || newPassword || !confirmPassword)
+      if (!currentPassword || !newPassword || !confirmPassword)
         throw createError.BadRequest("Required fields are missing");
 
       if (newPassword !== confirmPassword)
@@ -655,7 +692,7 @@ const UserController = {
       if (user.role?.toLowerCase() !== "admin")
         throw createError.Unauthorized("Unauthorized");
 
-      let checkPassword = await user.isValidPassword(result?.password);
+      let checkPassword = await user.isValidPassword(currentPassword);
 
       if (!checkPassword)
         throw createError.BadRequest("Invalid Current Password");

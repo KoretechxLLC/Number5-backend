@@ -177,6 +177,12 @@ router.get(
 );
 
 router.get(
+  "/get-events-count",
+  verifyAccessToken,
+  EventController.getEventsCounts
+);
+
+router.get(
   "/get-today-event",
   verifyAccessToken,
   EventController.getTodayEvent
