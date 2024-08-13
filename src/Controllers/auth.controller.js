@@ -41,6 +41,8 @@ const AuthController = {
         date,
         time,
         registration_type,
+        gender,
+        genderMember2,
       } = req.body;
 
       if (
@@ -51,7 +53,8 @@ const AuthController = {
         !date ||
         !time ||
         !registration_type ||
-        !filename
+        !filename ||
+        !gender
       )
         throw createError.BadRequest("Required fields are missing");
 
@@ -78,7 +81,11 @@ const AuthController = {
         registration_type: registration_type,
         profile_pic: filename,
         message: message,
+        gender: gender,
+        genderMember2: genderMember2,
       };
+
+      console.log(dataToSend, "send");
 
       let userData = await InpersonRegistrationModel.create(dataToSend);
 
@@ -103,7 +110,6 @@ const AuthController = {
       next(err);
     }
   },
-
   registerUser: async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -147,13 +153,13 @@ const AuthController = {
       if (!profileImageName)
         throw createError.BadRequest(
           `Invalid ${
-            registration_type?.toLowerCase() === "couples"
+            registration_type?.toLowerCase() === "couple"
               ? "Member1 Profile"
               : "Profile"
           } Image`
         );
 
-      if (registration_type?.toLowerCase() === "couples" && !partnerImageName)
+      if (registration_type?.toLowerCase() === "couple" && !partnerImageName)
         throw createError.BadRequest("Invalid Member2 Profile Image");
 
       if (
@@ -206,7 +212,7 @@ const AuthController = {
       if (existingUser)
         return next(
           createError.Conflict(
-            registration_type?.toLowerCase() == "couples"
+            registration_type?.toLowerCase() == "couple"
               ? `Member1 email already exists`
               : `This email already exists`
           )
@@ -219,7 +225,7 @@ const AuthController = {
       if (isPhoneNumberExists) {
         return next(
           createError.Conflict(
-            registration_type?.toLowerCase() == "couples"
+            registration_type?.toLowerCase() == "couple"
               ? `Member1 phone number already exists`
               : `This phone number already exists`
           )
@@ -227,7 +233,7 @@ const AuthController = {
       }
 
       if (
-        registration_type?.toLowerCase() === "couples" &&
+        registration_type?.toLowerCase() === "couple" &&
         (!partner_details || Object.keys(partner_details).length === 0)
       ) {
         throw createError.BadRequest("Required fields are missing");
@@ -235,7 +241,7 @@ const AuthController = {
 
       let partnerUser;
 
-      if (registration_type?.toLowerCase() === "couples") {
+      if (registration_type?.toLowerCase() === "couple") {
         let {
           registration_type,
           couples_type,
@@ -321,7 +327,7 @@ const AuthController = {
           session.endSession();
           return next(
             createError.Conflict(
-              registration_type?.toLowerCase() == "couples"
+              registration_type?.toLowerCase() == "couple"
                 ? `Member2 phone number already exists`
                 : `This phone number already exists`
             )
@@ -618,7 +624,6 @@ const AuthController = {
       const cardNumber = await generateCardNumber();
 
       user.membership_id = membership_id;
-
       const emailPassword = password;
 
       const salt = await bcrypt.genSalt(10);

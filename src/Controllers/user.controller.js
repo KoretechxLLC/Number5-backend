@@ -9,6 +9,7 @@ const fs = require("fs");
 const MembershipModel = require("../Models/membership.model");
 const { sendEmail } = require("../../helper/send_email");
 const bcrypt = require("bcrypt");
+const InpersonRegistrationModel = require("../Models/inperson.registration.model");
 
 const UserController = {
   get: async (req, res, next) => {
@@ -706,6 +707,36 @@ const UserController = {
 
       res.status(200).json({
         message: "Password updated successfully",
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_inperson_registration: async (req, res, next) => {
+    try {
+      let registrations = await InpersonRegistrationModel.find().sort({
+        created_at: -1,
+      });
+
+      res.status(200).json({
+        message: "Inperson Registrations Retrieved Successfully",
+        data: registrations,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  delete_inperson_registration: async (req, res, next) => {
+    try {
+      let id = req.params.id;
+
+      let deleteData = await InpersonRegistrationModel.findByIdAndDelete(id);
+
+      res.status(200).json({
+        message: "Data deleted successfully",
+        status: true,
+        data: deleteData,
       });
     } catch (err) {
       next(err);

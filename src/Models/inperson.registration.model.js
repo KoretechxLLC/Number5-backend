@@ -28,6 +28,13 @@ const InpersonRegistrationSchema = new Schema({
     type: String,
     required: true,
   },
+  gender: {
+    type: String,
+    required: true,
+  },
+  genderMember2: {
+    type: String,
+  },
   phone_number: {
     type: String,
     required: true,

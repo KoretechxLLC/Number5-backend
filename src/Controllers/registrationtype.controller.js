@@ -16,12 +16,12 @@ const RegistrationTypeController = {
 
       if (
         !registration_type ||
-        (registration_type?.toLowerCase() == "couples" && !couples_type)
+        (registration_type?.toLowerCase() == "couple" && !couples_type)
       )
         throw createError.BadRequest("Required fields are missing");
 
       if (registration_type?.toLowerCase() == "single" && couples_type)
-        throw createError.BadRequest("Cannot add couples type in type single");
+        throw createError.BadRequest("Cannot add couple type in type single");
 
       let registrationData = {
         registration_type: registration_type,
@@ -86,12 +86,12 @@ const RegistrationTypeController = {
       if (
         !registration_type ||
         !id ||
-        (registration_type?.toLowerCase() == "couples" && !couples_type)
+        (registration_type?.toLowerCase() == "couple" && !couples_type)
       )
         throw createError.BadRequest("Required fields are missing");
 
       if (registration_type?.toLowerCase() == "single" && couples_type)
-        throw createError.BadRequest("Cannot add couples type in type single");
+        throw createError.BadRequest("Cannot add couple type in type single");
       const registration = await RegistrationTypeModel.findById(id);
 
       if (!registration)
