@@ -134,15 +134,15 @@ const UserSchema = new Schema({
   partner_ref: {
     type: String,
   },
-  token : {
-    type : String
+  token: {
+    type: String,
   },
-  push_notification_option : {
-    type : Boolean
+  push_notification_option: {
+    type: Boolean,
   },
-  event_visits : {
-    type : Number,
-    default : 0
+  event_visits: {
+    type: Number,
+    default: 0,
   },
   created_at: {
     type: Date,

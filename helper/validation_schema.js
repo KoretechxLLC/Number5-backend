@@ -32,7 +32,7 @@ const authSchema = joi.object({
   event_vistis: joi.number(),
   email: joi.string().email().lowercase().required(),
   partner_details: joi.when("registration_type", {
-    is: joi.string().valid("couples"),
+    is: joi.string().valid("couple"),
     then: joi.object().required(),
     otherwise: joi.object(),
   }),

@@ -30,7 +30,7 @@ authRoutes.post("/refresh-token", AuthController.refreshToken);
 authRoutes.delete("/sign-out/:token", AuthController.signout);
 
 authRoutes.put(
-  "/approved-user ",
+  "/approved-user",
   verifyAccessToken,
   verifyAdminRole,
   AuthController.approvedUser

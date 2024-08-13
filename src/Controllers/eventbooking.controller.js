@@ -339,7 +339,7 @@ const EventBookingController = {
         let email = user.email;
         await sendEmailWithAttachment(email, subject, message, pdfPath);
 
-        if (user?.registration_type == "couples") {
+        if (user?.registration_type == "couple") {
           let partner_ref = user.partner_ref;
 
           let partnerData = await UserModel.findById(partner_ref).session(
@@ -510,7 +510,7 @@ const EventBookingController = {
         let email = user.email;
         await sendEmailWithAttachment(email, subject, message, pdfPath);
 
-        if (user?.registration_type == "couples") {
+        if (user?.registration_type == "couple") {
           let partner_ref = user.partner_ref;
 
           let partnerData = await UserModel.findById(partner_ref).session(
@@ -590,7 +590,7 @@ const EventBookingController = {
 
         if (
           cancelledBooking.selected_booking_type?.registration_type?.toLowerCase() ===
-          "couples"
+          "couple"
         ) {
           const coupleId = cancelledBooking.user_data?.partner_ref;
           const coupleData = await UserModel.findById(coupleId).session(

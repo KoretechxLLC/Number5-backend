@@ -312,4 +312,18 @@ router.put(
   UserController.changeAdminPassword
 );
 
+router.get(
+  "/get-inperson-registrations",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.get_inperson_registration
+);
+
+router.delete(
+  "/delete-inperson-registration/:id",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.delete_inperson_registration
+);
+
 module.exports = router;
