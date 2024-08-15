@@ -33,7 +33,11 @@ const membershipSchema = new mongoose.Schema({
   scope_heading: {
     type: String,
   },
-  single_membership_amount: {
+  male_membership_amount: {
+    type: Number,
+    required: true,
+  },
+  female_membership_amount: {
     type: Number,
     required: true,
   },
@@ -58,6 +62,14 @@ const membershipSchema = new mongoose.Schema({
   },
   total_passes: {
     type: Number,
+  },
+  is_unlimited_guest_allowed: {
+    type: Boolean,
+    default: false,
+  },
+  is_unlimited_visits: {
+    type: Boolean,
+    default: false,
   },
   total_guests_allowed: {
     type: Number,

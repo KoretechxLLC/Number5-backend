@@ -326,4 +326,29 @@ router.delete(
   UserController.delete_inperson_registration
 );
 
+router.get(
+  "/get-executive-eligibility/:id",
+  verifyAccessToken,
+  UserController.is_eligible_for_executive
+);
+
+router.get(
+  "/get-elite-eligibility/:id",
+  verifyAccessToken,
+  UserController.is_eligible_for_elite
+);
+
+router.get(
+  "/get-elite_not_invited_eligible_members",
+  verifyAccessToken,
+  UserController.get_eligible_non_invited_members
+);
+
+router.put(
+  "/invite-eligible-elite-member",
+  verifyAccessToken,
+  verifyAdminRole,
+  UserController.invite_for_elite_membership
+);
+
 module.exports = router;

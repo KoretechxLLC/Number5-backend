@@ -162,30 +162,89 @@ const AuthController = {
       if (registration_type?.toLowerCase() === "couple" && !partnerImageName)
         throw createError.BadRequest("Invalid Member2 Profile Image");
 
-      if (
-        !registration_type ||
-        !gender ||
-        !first_name ||
-        !last_name ||
-        !date_of_birth ||
-        !email ||
-        !phone_number ||
-        !address ||
-        !occupation ||
-        !interest ||
-        !hobbies ||
-        !ethnicity ||
-        !country ||
-        !city ||
-        !postalCode ||
-        !height ||
-        !weight ||
-        !sexuality ||
-        !life_style ||
-        !wanted_experience ||
-        !user_quality
-      )
-        throw createError.BadRequest("Required Fields Are Missing");
+      if (!registration_type) {
+        throw createError.BadRequest("Registration type is required.");
+      }
+
+      if (!gender) {
+        throw createError.BadRequest("Gender is required.");
+      }
+
+      if (!first_name) {
+        throw createError.BadRequest("First name is required.");
+      }
+
+      if (!last_name) {
+        throw createError.BadRequest("Last name is required.");
+      }
+
+      if (!date_of_birth) {
+        throw createError.BadRequest("Date of birth is required.");
+      }
+
+      if (!email) {
+        throw createError.BadRequest("Email is required.");
+      }
+
+      if (!phone_number) {
+        throw createError.BadRequest("Phone number is required.");
+      }
+
+      if (!address) {
+        throw createError.BadRequest("Address is required.");
+      }
+
+      if (!occupation) {
+        throw createError.BadRequest("Occupation is required.");
+      }
+
+      if (!interest) {
+        throw createError.BadRequest("Interest is required.");
+      }
+
+      if (!hobbies) {
+        throw createError.BadRequest("Hobbies are required.");
+      }
+
+      if (!ethnicity) {
+        throw createError.BadRequest("Ethnicity is required.");
+      }
+
+      if (!country) {
+        throw createError.BadRequest("Country is required.");
+      }
+
+      if (!city) {
+        throw createError.BadRequest("City is required.");
+      }
+
+      if (!postalCode) {
+        throw createError.BadRequest("Postal code is required.");
+      }
+
+      if (!height) {
+        throw createError.BadRequest("Height is required.");
+      }
+
+      if (!weight) {
+        throw createError.BadRequest("Weight is required.");
+      }
+
+      if (!sexuality) {
+        throw createError.BadRequest("Sexuality is required.");
+      }
+
+      if (!life_style) {
+        throw createError.BadRequest("Life style is required.");
+      }
+
+      if (!wanted_experience) {
+        throw createError.BadRequest("Wanted experience is required.");
+      }
+
+      if (!user_quality) {
+        throw createError.BadRequest("User quality is required.");
+      }
 
       if (
         !is_agree_terms_and_conditions ||
@@ -268,30 +327,89 @@ const AuthController = {
           is_agree_terms_and_conditions,
         } = partner_details;
 
-        if (
-          !registration_type ||
-          !gender ||
-          !first_name ||
-          !last_name ||
-          !date_of_birth ||
-          !email ||
-          !phone_number ||
-          !address ||
-          !occupation ||
-          !interest ||
-          !hobbies ||
-          !ethnicity ||
-          !country ||
-          !city ||
-          !postalCode ||
-          !height ||
-          !weight ||
-          !sexuality ||
-          !life_style ||
-          !wanted_experience ||
-          !user_quality
-        )
-          throw createError.BadRequest("Required Fields Are Missing");
+        if (!registration_type) {
+          throw createError.BadRequest("Registration type is required.");
+        }
+
+        if (!gender) {
+          throw createError.BadRequest("Gender is required.");
+        }
+
+        if (!first_name) {
+          throw createError.BadRequest("First name is required.");
+        }
+
+        if (!last_name) {
+          throw createError.BadRequest("Last name is required.");
+        }
+
+        if (!date_of_birth) {
+          throw createError.BadRequest("Date of birth is required.");
+        }
+
+        if (!email) {
+          throw createError.BadRequest("Email is required.");
+        }
+
+        if (!phone_number) {
+          throw createError.BadRequest("Phone number is required.");
+        }
+
+        if (!address) {
+          throw createError.BadRequest("Address is required.");
+        }
+
+        if (!occupation) {
+          throw createError.BadRequest("Occupation is required.");
+        }
+
+        if (!interest) {
+          throw createError.BadRequest("Interest is required.");
+        }
+
+        if (!hobbies) {
+          throw createError.BadRequest("Hobbies are required.");
+        }
+
+        if (!ethnicity) {
+          throw createError.BadRequest("Ethnicity is required.");
+        }
+
+        if (!country) {
+          throw createError.BadRequest("Country is required.");
+        }
+
+        if (!city) {
+          throw createError.BadRequest("City is required.");
+        }
+
+        if (!postalCode) {
+          throw createError.BadRequest("Postal code is required.");
+        }
+
+        if (!height) {
+          throw createError.BadRequest("Height is required.");
+        }
+
+        if (!weight) {
+          throw createError.BadRequest("Weight is required.");
+        }
+
+        if (!sexuality) {
+          throw createError.BadRequest("Sexuality is required.");
+        }
+
+        if (!life_style) {
+          throw createError.BadRequest("Life style is required.");
+        }
+
+        if (!wanted_experience) {
+          throw createError.BadRequest("Wanted experience is required.");
+        }
+
+        if (!user_quality) {
+          throw createError.BadRequest("User quality is required.");
+        }
 
         if (
           !is_agree_terms_and_conditions ||
@@ -560,6 +678,10 @@ const AuthController = {
         country: user?.country,
         city: user?.city,
         postalCode: user?.postalCode,
+        is_invited_for_elite_membership: user?.is_invited_for_elite_membership,
+        is_elgible_for_executive_membership:
+          user?.is_eligible_for_executive_membership,
+        is_elgible_for_elite_membership: user?.is_elgible_for_elite_membership,
         wanted_experience: user?.wanted_experience,
         user_quality: user?.user_quality,
         user_status: user?.user_status,
