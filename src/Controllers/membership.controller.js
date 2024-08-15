@@ -18,7 +18,8 @@ const MembershipController = {
         gender_type,
         additional_details,
         scope_heading,
-        single_membership_amount,
+        male_membership_amount,
+        female_membership_amount,
         couple_membership_amount,
         booking_type,
         default_membership,
@@ -47,6 +48,26 @@ const MembershipController = {
 
       if (ismembership_exists)
         throw createError.Conflict("Package Name Already Exists");
+
+      if (membershipData?.gender_type) {
+        console.log(typeof membershipData.gender_type[0], "GENDERtYPE");
+
+        membershipData.gender_type = JSON.parse(membershipData.gender_type);
+      }
+
+      console.log(membershipData.gender_type, "gendertYPE");
+
+      if (membershipData?.booking_type) {
+        membershipData.booking_type = JSON.parse(membershipData.booking_type);
+      }
+
+      if (membershipData?.benefits) {
+        membershipData.benefits = JSON.parse(membershipData.benefits);
+      }
+
+      if (membershipData?.scope) {
+        membershipData.scope = JSON.parse(membershipData.scope);
+      }
 
       let result = await MembershipSchema.validateAsync(membershipData);
 
@@ -91,6 +112,7 @@ const MembershipController = {
   },
   update_membersip: async (req, res, next) => {
     let membershipData = req.body;
+
     let filename = req?.file?.filename;
 
     try {
@@ -102,7 +124,8 @@ const MembershipController = {
         gender_type,
         additional_details,
         scope_heading,
-        single_membership_amount,
+        male_membership_amount,
+        female_membership_amount,
         couple_membership_amount,
         badge_image_path,
         booking_type,

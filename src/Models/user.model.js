@@ -144,6 +144,18 @@ const UserSchema = new Schema({
     type: Number,
     default: 0,
   },
+  is_invited_for_elite_membership: {
+    type: Boolean,
+    default: false,
+  },
+  is_elgible_for_executive_membership: {
+    type: Boolean,
+    default: false,
+  },
+  is_elgible_for_elite_membership: {
+    type: Boolean,
+    default: false,
+  },
   created_at: {
     type: Date,
     default: Date.now,

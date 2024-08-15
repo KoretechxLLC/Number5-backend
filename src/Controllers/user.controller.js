@@ -10,6 +10,8 @@ const MembershipModel = require("../Models/membership.model");
 const { sendEmail } = require("../../helper/send_email");
 const bcrypt = require("bcrypt");
 const InpersonRegistrationModel = require("../Models/inperson.registration.model");
+const MembershipHistoryModel = require("../Models/membership.history.model");
+const mongoose = require("mongoose");
 
 const UserController = {
   get: async (req, res, next) => {
@@ -47,6 +49,10 @@ const UserController = {
         interest: user?.interest,
         hobbies: user?.hobbies,
         country: user?.country,
+        is_invited_for_elite_membership: user?.is_invited_for_elite_membership,
+        is_elgible_for_executive_membership:
+          user?.is_eligible_for_executive_membership,
+        is_elgible_for_elite_membership: user?.is_elgible_for_elite_membership,
         city: user?.city,
         postalCode: user?.postalCode,
         life_style: user?.life_style,
@@ -120,6 +126,12 @@ const UserController = {
           country: user?.country,
           city: user?.city,
           postalCode: user?.postalCode,
+          is_invited_for_elite_membership:
+            user?.is_invited_for_elite_membership,
+          is_elgible_for_executive_membership:
+            user?.is_eligible_for_executive_membership,
+          is_elgible_for_elite_membership:
+            user?.is_elgible_for_elite_membership,
           sexuality: user?.sexuality,
           life_style: user?.life_style,
           membership: user?.membership,
@@ -239,20 +251,116 @@ const UserController = {
     }
   },
   upgrade_membership: async (req, res, next) => {
+    const session = await mongoose.startSession();
+
     try {
+      session.startTransaction();
+
       let { membership, id, amount } = req.body;
 
-      if (!membership || Object.keys(membership).length == 0 || !id) {
+      if (!membership || Object.keys(membership).length === 0 || !id) {
         throw createError.BadRequest("Required fields are missing");
       }
 
-      let userData = await UserModel.findById(id);
-
+      let userData = await UserModel.findById(id).session(session);
       if (!userData) throw createError.NotFound("User Not Found");
 
-      let membershipData = await MembershipModel.findById(membership?._id);
-
+      let membershipData = await MembershipModel.findById(
+        membership?._id
+      ).session(session);
       if (!membershipData) throw createError.NotFound("Membership Not Found");
+
+      const lastMembership = await MembershipHistoryModel.findOne()
+        .sort({ created_at: -1 })
+        .session(session);
+
+      if (membership?.package_name === "Executive Membership") {
+        let allPremiumMembership = await MembershipHistoryModel.find({
+          package_name: "Premium Membership",
+          userId: id,
+        }).session(session);
+
+        if (!allPremiumMembership || allPremiumMembership.length === 0) {
+          throw createError.BadRequest(
+            "You are not eligible for executive membership"
+          );
+        }
+
+        let allDays = allPremiumMembership.reduce((pre, curr) => {
+          return (
+            (Number(pre) || 0) + (Number(curr?.membership_duration_days) || 0)
+          );
+        }, 0);
+
+        let lastMembershipDays = 0;
+
+        if (lastMembership?.package_name === "Premium Membership") {
+          const { purchase_date, expiry_date } = lastMembership;
+          const purchaseDate = new Date(purchase_date);
+          const expiryDate = new Date(expiry_date);
+          const currentDate = new Date();
+
+          const totalDurationDays = Math.ceil(
+            (expiryDate - purchaseDate) / (1000 * 60 * 60 * 24)
+          );
+          const remainingDays = Math.ceil(
+            (expiryDate - currentDate) / (1000 * 60 * 60 * 24)
+          );
+          let totalDays = totalDurationDays - remainingDays;
+
+          lastMembershipDays =
+            currentDate >= expiryDate ? totalDurationDays : totalDays;
+        }
+
+        if (Number(allDays) + Number(lastMembershipDays) < 180) {
+          throw createError.BadRequest(
+            "You are not eligible for executive membership"
+          );
+        }
+      } else if (membership?.package_name === "Elite Membership") {
+        let allExecutiveMembership = await MembershipHistoryModel.find({
+          package_name: "Executive Membership",
+          userId: id,
+        }).session(session);
+
+        if (!allExecutiveMembership || allExecutiveMembership.length === 0) {
+          throw createError.BadRequest(
+            "You are not eligible for elite membership"
+          );
+        }
+
+        let allDays = allExecutiveMembership.reduce((pre, curr) => {
+          return (
+            (Number(pre) || 0) + (Number(curr?.membership_duration_days) || 0)
+          );
+        }, 0);
+
+        let lastMembershipDays = 0;
+
+        if (lastMembership?.package_name === "Executive Membership") {
+          const { purchase_date, expiry_date } = lastMembership;
+          const purchaseDate = new Date(purchase_date);
+          const expiryDate = new Date(expiry_date);
+          const currentDate = new Date();
+
+          const totalDurationDays = Math.ceil(
+            (expiryDate - purchaseDate) / (1000 * 60 * 60 * 24)
+          );
+          const remainingDays = Math.ceil(
+            (expiryDate - currentDate) / (1000 * 60 * 60 * 24)
+          );
+          let totalDays = totalDurationDays - remainingDays;
+
+          lastMembershipDays =
+            currentDate >= expiryDate ? totalDurationDays : totalDays;
+        }
+
+        if (Number(allDays) + Number(lastMembershipDays) < 180) {
+          throw createError.BadRequest(
+            "You are not eligible for elite membership"
+          );
+        }
+      }
 
       membershipData.consumedPasses = 0;
       membershipData.guestAttended = 0;
@@ -261,24 +369,65 @@ const UserController = {
 
       let expiryDate = new Date(membershipData.purchase_date);
       expiryDate.setMonth(expiryDate.getMonth() + 1);
-
       membershipData.expiry_date = expiryDate;
 
       let updatedUserData = await UserModel.findByIdAndUpdate(
         id,
         { $set: { membership: membershipData } },
-        { new: true }
+        { new: true, session }
       );
 
-      let dataToSend = { ...updatedUserData._doc };
+      let dataToSend = { ...updatedUserData._doc, id: updatedUserData?._id };
 
-      dataToSend.id = updatedUserData?._id;
+      if (lastMembership) {
+        const { purchase_date, expiry_date } = lastMembership;
+        const purchaseDate = new Date(purchase_date);
+        const expiryDate = new Date(expiry_date);
+        const currentDate = new Date();
+
+        const totalDurationDays = Math.ceil(
+          (expiryDate - purchaseDate) / (1000 * 60 * 60 * 24)
+        );
+        const remainingDays = Math.ceil(
+          (expiryDate - currentDate) / (1000 * 60 * 60 * 24)
+        );
+        let totalDays = totalDurationDays - remainingDays;
+
+        lastMembership.membership_duration_days =
+          currentDate >= expiryDate ? totalDurationDays : totalDays;
+        await lastMembership.save({ session });
+      }
+
+      let dataToSendForHistory = {
+        package_name: membershipData.package_name,
+        userId: id,
+        membership_id: membershipData?._id,
+        duration_type: membershipData?.duration_type,
+        male_membership_amount: membershipData?.male_membership_amount,
+        female_membership_amount: membershipData?.female_membership_amount,
+        couple_membership_amount: membershipData?.couple_membership_amount,
+        purchase_date: membershipData?.purchase_date,
+        expiry_date: membershipData?.expiry_date,
+        default_membership: membershipData?.default_membership,
+      };
+
+      let membershipHistory = await MembershipHistoryModel.create(
+        [dataToSendForHistory],
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
 
       res.status(200).json({
-        message: "User Data Successfully Updated",
+        message: "Membership Successfully Updated",
         data: dataToSend,
+        last_membership: lastMembership,
+        current_membership: membershipHistory,
       });
     } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
       next(err);
     }
   },
@@ -435,6 +584,12 @@ const UserController = {
             country: user?.country,
             city: user?.city,
             postalCode: user?.postalCode,
+            is_invited_for_elite_membership:
+              user?.is_invited_for_elite_membership,
+            is_elgible_for_executive_membership:
+              user?.is_eligible_for_executive_membership,
+            is_elgible_for_elite_membership:
+              user?.is_elgible_for_elite_membership,
             address: user?.address,
             occupation: user?.occupation,
             height: user?.height,
@@ -514,6 +669,12 @@ const UserController = {
             country: user?.country,
             city: user?.city,
             postalCode: user?.postalCode,
+            is_invited_for_elite_membership:
+              user?.is_invited_for_elite_membership,
+            is_elgible_for_executive_membership:
+              user?.is_eligible_for_executive_membership,
+            is_elgible_for_elite_membership:
+              user?.is_elgible_for_elite_membership,
             weight: user?.weight,
             id: user?.id,
             sexuality: user?.sexuality,
@@ -591,6 +752,12 @@ const UserController = {
             country: user?.country,
             city: user?.city,
             postalCode: user?.postalCode,
+            is_invited_for_elite_membership:
+              user?.is_invited_for_elite_membership,
+            is_elgible_for_executive_membership:
+              user?.is_eligible_for_executive_membership,
+            is_elgible_for_elite_membership:
+              user?.is_elgible_for_elite_membership,
             id: user?.id,
             sexuality: user?.sexuality,
             life_style: user?.life_style,
@@ -726,7 +893,6 @@ const UserController = {
       next(err);
     }
   },
-
   delete_inperson_registration: async (req, res, next) => {
     try {
       let id = req.params.id;
@@ -739,6 +905,235 @@ const UserController = {
         data: deleteData,
       });
     } catch (err) {
+      next(err);
+    }
+  },
+  is_eligible_for_executive: async (req, res, next) => {
+    try {
+      let id = req.params.id;
+
+      let allPremiumMembership = await MembershipHistoryModel.find({
+        package_name: "Premium Membership",
+        userId: id,
+      });
+      const lastMembership = await MembershipHistoryModel.findOne().sort({
+        created_at: -1,
+      });
+
+      if (!allPremiumMembership || allPremiumMembership.length == 0) {
+        res.status(401).json({
+          message: "You are not eligible for executive membership",
+          totalDays: 0,
+          remainingDays: 180,
+          status: false,
+        });
+      }
+
+      let allDays =
+        allPremiumMembership &&
+        allPremiumMembership?.length > 0 &&
+        allPremiumMembership?.reduce((pre, curr) => {
+          return (
+            (Number(pre) || 0) + (Number(curr?.membership_duration_days) || 0)
+          );
+        }, 0);
+
+      let lastMembershipDays = 0;
+
+      if (
+        lastMembership &&
+        lastMembership?.package_name == "Premium Membership"
+      ) {
+        const { purchase_date, expiry_date } = lastMembership;
+
+        const purchaseDate = new Date(purchase_date);
+        const expiryDate = new Date(expiry_date);
+        const currentDate = new Date();
+
+        const totalDurationDays = Math.ceil(
+          (expiryDate - purchaseDate) / (1000 * 60 * 60 * 24)
+        );
+
+        const remainingDays = Math.ceil(
+          (expiryDate - currentDate) / (1000 * 60 * 60 * 24)
+        );
+
+        let totalDays = totalDurationDays - remainingDays;
+
+        if (currentDate >= expiryDate) {
+          lastMembershipDays = totalDurationDays;
+        } else {
+          lastMembershipDays = totalDays;
+        }
+      }
+
+      let totalDays = Number(allDays) + Number(lastMembershipDays);
+
+      if (totalDays > 180) {
+        let user = await UserModel.findById(id);
+
+        if (user && !user?.is_elgible_for_executive_membership) {
+          user.is_elgible_for_executive_membership = true;
+          await user.save();
+        }
+
+        res.status(200).json({
+          message: "You are eligible for executive membership",
+          totalDays: totalDays,
+          remainingDays: 180 - totalDays,
+          status: true,
+        });
+      } else {
+        res.status(200).json({
+          message: "You are not eligible for executive membership",
+          totalDays: totalDays,
+          remainingDays: 180 - totalDays,
+          status: false,
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+  },
+  is_eligible_for_elite: async (req, res, next) => {
+    try {
+      let id = req.params.id;
+
+      let allExecutiveMembership = await MembershipHistoryModel.find({
+        package_name: "Executive Membership",
+        userId: id,
+      });
+      const lastMembership = await MembershipHistoryModel.findOne().sort({
+        created_at: -1,
+      });
+
+      if (!allExecutiveMembership || allExecutiveMembership.length == 0) {
+        res.status(401).json({
+          message: "You are not eligible for elite membership",
+          totalDays: 0,
+          remainingDays: 180,
+          status: false,
+        });
+      }
+
+      let allDays =
+        allExecutiveMembership &&
+        allExecutiveMembership?.length > 0 &&
+        allExecutiveMembership?.reduce((pre, curr) => {
+          return (
+            (Number(pre) || 0) + (Number(curr?.membership_duration_days) || 0)
+          );
+        }, 0);
+
+      let lastMembershipDays = 0;
+
+      if (
+        lastMembership &&
+        lastMembership?.package_name == "Executive Membership"
+      ) {
+        const { purchase_date, expiry_date } = lastMembership;
+
+        const purchaseDate = new Date(purchase_date);
+        const expiryDate = new Date(expiry_date);
+        const currentDate = new Date();
+
+        const totalDurationDays = Math.ceil(
+          (expiryDate - purchaseDate) / (1000 * 60 * 60 * 24)
+        );
+
+        const remainingDays = Math.ceil(
+          (expiryDate - currentDate) / (1000 * 60 * 60 * 24)
+        );
+
+        let totalDays = totalDurationDays - remainingDays;
+
+        if (currentDate >= expiryDate) {
+          lastMembershipDays = totalDurationDays;
+        } else {
+          lastMembershipDays = totalDays;
+        }
+      }
+
+      let totalDays = Number(allDays) + Number(lastMembershipDays);
+
+      console.log(totalDays, "totalDasy");
+
+      if (totalDays > 180) {
+        let user = await UserModel.findById(id);
+
+        if (user && !user?.is_elgible_for_elite_membership) {
+          user.is_elgible_for_elite_membership = true;
+          await user.save();
+        }
+
+        console.log(totalDays, "totalDays");
+
+        res.status(200).json({
+          message: "You are eligible for elite membership",
+          totalDays: totalDays,
+          remainingDays: 180 - totalDays,
+          status: true,
+        });
+      } else {
+        res.status(200).json({
+          message: "You are not eligible for elite membership",
+          totalDays: totalDays,
+          remainingDays: 180 - totalDays,
+          status: false,
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+  },
+  get_eligible_non_invited_members: async (req, res, next) => {
+    try {
+      let users = await UserModel.find({
+        is_elgible_for_elite_membership: true,
+        is_invited_for_elite_membership: false,
+      });
+
+      res.status(200).json({
+        message: "Users Successfully Retrieved",
+        data: users,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  invite_for_elite_membership: async (req, res, next) => {
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      let { email } = req.body;
+
+      if (!email) throw createError.BadRequest("Email Not Found");
+
+      let user = await UserModel.findOne({ email: email }).session(session);
+      if (!user) throw createError.BadRequest("User Not Found");
+
+      user.is_invited_for_elite_membership = true;
+      await user.save({ session });
+
+      let subject = "Invitation for Elite Membership";
+      let message = `Dear Member,
+      
+      You are invited to apply for elite membership in our club. You can purchase elite membership in the app membership packages section.`;
+
+      await sendEmail(email, subject, message);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({
+        message: "Invitation sent successfully",
+        data: user,
+      });
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
       next(err);
     }
   },
