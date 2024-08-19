@@ -35,11 +35,9 @@ const membershipSchema = new mongoose.Schema({
   },
   male_membership_amount: {
     type: Number,
-    required: true,
   },
   female_membership_amount: {
     type: Number,
-    required: true,
   },
   consumedPasses: {
     type: Number,
@@ -58,7 +56,6 @@ const membershipSchema = new mongoose.Schema({
   },
   couple_membership_amount: {
     type: Number,
-    required: true,
   },
   total_passes: {
     type: Number,

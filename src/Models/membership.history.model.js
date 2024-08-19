@@ -25,15 +25,12 @@ const membershipHistorySchema = new mongoose.Schema({
   },
   male_membership_amount: {
     type: Number,
-    required: true,
   },
   female_membership_amount: {
     type: Number,
-    required: true,
   },
   couple_membership_amount: {
     type: Number,
-    required: true,
   },
   purchase_date: {
     type: Date,
