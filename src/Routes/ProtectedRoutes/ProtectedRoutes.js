@@ -274,6 +274,12 @@ router.delete(
   verifyAccessToken,
   UserController.delete_user_account
 );
+  
+router.delete(
+  "/delete-message/:id",
+  verifyAccessToken,
+  HelpController.delete_message
+);
 
 router.post(
   "/change-notification-option",

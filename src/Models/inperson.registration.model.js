@@ -32,9 +32,6 @@ const InpersonRegistrationSchema = new Schema({
     type: String,
     required: true,
   },
-  genderMember2: {
-    type: String,
-  },
   phone_number: {
     type: String,
     required: true,
@@ -42,6 +39,22 @@ const InpersonRegistrationSchema = new Schema({
   profile_pic: {
     type: String,
     required: true,
+  },
+  id_card : {
+    type : String,
+    required : true
+  },
+  address : {
+    type : String
+  },
+  partner_details : {
+    type : {}
+  },
+  partner_profile_pic : {
+    type : String
+  },
+  partner_id_card : {
+    type : String
   },
   created_at: {
     type: Date,

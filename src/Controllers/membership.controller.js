@@ -25,6 +25,7 @@ const MembershipController = {
         default_membership,
         total_passes,
         total_guests_allowed,
+
       } = membershipData;
 
       if (
@@ -34,7 +35,7 @@ const MembershipController = {
         benefits.length == 0 ||
         !booking_type ||
         booking_type.length == 0 ||
-        !gender_type
+        !gender_type || !token || !billingCountry || !billingZipCode
       )
         throw createError.BadRequest("Required fields are missing");
 
@@ -50,12 +51,8 @@ const MembershipController = {
         throw createError.Conflict("Package Name Already Exists");
 
       if (membershipData?.gender_type) {
-        console.log(typeof membershipData.gender_type[0], "GENDERtYPE");
-
         membershipData.gender_type = JSON.parse(membershipData.gender_type);
       }
-
-      console.log(membershipData.gender_type, "gendertYPE");
 
       if (membershipData?.booking_type) {
         membershipData.booking_type = JSON.parse(membershipData.booking_type);
@@ -71,7 +68,14 @@ const MembershipController = {
 
       let result = await MembershipSchema.validateAsync(membershipData);
 
+
+
+
       let new_membership_Package = await new MembershipModel(result);
+
+
+    
+
 
       const membershipPackage = await new_membership_Package.save();
 

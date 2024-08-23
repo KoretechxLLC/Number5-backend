@@ -41,14 +41,14 @@ const generateUsername = async (user) => {
 
   let baseUsername = (first_name || "") + (last_name || "");
 
-  let username = baseUsername;
+  let username = baseUsername.replace(/\s+/g, ""); // Removes all spaces
 
   let counter = Math.floor(Math.random() * 100);
 
   while (true) {
     let tempUsername = username;
     if (counter > 1) {
-      tempUsername = baseUsername + counter;
+      tempUsername = username + counter;
     }
 
     const usernameExists = await UserModel.findOne({ username: tempUsername });
@@ -57,7 +57,6 @@ const generateUsername = async (user) => {
       username = tempUsername + counter;
       break;
     }
-
     counter++;
   }
 

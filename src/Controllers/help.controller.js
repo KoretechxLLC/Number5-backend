@@ -7,9 +7,16 @@ const { sendEmail } = require("../../helper/send_email");
 const HelpController = {
   sendMessage: async (req, res, next) => {
     try {
-      let { subject, message, id } = req.body;
+      let { subject, message, id, provided_email, provided_phone_number } =
+        req.body;
 
-      if (!subject || !message || !id)
+      if (
+        !subject ||
+        !message ||
+        !id ||
+        !provided_email ||
+        !provided_phone_number
+      )
         throw createError.BadRequest("Required fields are missing");
 
       const result = await messageSchema.validateAsync(req.body);
@@ -26,6 +33,8 @@ const HelpController = {
         first_name: user?.first_name,
         last_name: user?.last_name,
         email: user?.email,
+        provided_email: provided_email,
+        provided_phone_number: provided_phone_number,
         phone_number: user?.phone_number,
         address: user?.address,
         username: user?.username,
@@ -97,6 +106,28 @@ const HelpController = {
       res.status(200).json({
         message: "help Data Retrieved Successfully",
         data: helpers,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  delete_message: async (req, res, next) => {
+    try {
+      let id = req?.params?.id;
+
+      if (!id) {
+        throw createError.BadRequest("Required fields are missing");
+      }
+
+      let message = await HelpModel.findByIdAndDelete(id);
+
+      if (!message) {
+        throw createError.NotFound("Message not found");
+      }
+
+      res.status(200).json({
+        message: "help Data deleted Successfully",
+        data: message,
       });
     } catch (err) {
       next(err);

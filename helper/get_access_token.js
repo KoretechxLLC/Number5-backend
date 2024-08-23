@@ -8,7 +8,6 @@ function getAccessToken() {
 
         const destinationFolder = path.join(__dirname, '../service-account');
 
-        console.log(destinationFolder,"folder")
 
     const SCOPES = 'https://www.googleapis.com/auth/firebase.messaging'
 

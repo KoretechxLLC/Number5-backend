@@ -7,6 +7,8 @@ const fs = require("fs");
 const mongoose = require("mongoose");
 const { PDFDocument, rgb } = require("pdf-lib");
 const fontkit = require("@pdf-lib/fontkit");
+const stripe = require("stripe")(process.env.STRIPE_SK);
+
 const {
   sendEmailWithAttachment,
   sendEmail,
@@ -145,6 +147,8 @@ async function generatePDF(data) {
 
 const EventBookingController = {
   post: async (req, res, next) => {
+    let stripeData;
+
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -163,6 +167,7 @@ const EventBookingController = {
         payment_option,
         shop_items,
         amount,
+        token,
       } = req.body;
 
       if (guest_details) {
@@ -178,6 +183,16 @@ const EventBookingController = {
       }
 
       if (!user_id) throw createError.BadRequest("User Id is missing");
+
+      if (payment_option && payment_option?.toLowerCase() == "card") {
+        if (!amount) {
+          throw createError.BadRequest("Amount is missing");
+        }
+
+        if (!token) {
+          throw createError.BadRequest("Card token is missing");
+        }
+      }
 
       let user = await UserModel.findById(user_id).session(session);
       if (!user) throw createError.NotFound("User Not Found");
@@ -227,7 +242,7 @@ const EventBookingController = {
 
       if (
         selected_booking_type?.membership == user.membership.package_name &&
-        selected_booking_type?.membership !== "Pay as you attend"
+        selected_booking_type?.membership !== "Pay as you go"
       ) {
         let guest_allowed = user.membership.total_guests_allowed;
         let guest_attended = user.membership.guestAttended;
@@ -242,7 +257,7 @@ const EventBookingController = {
       }
 
       if (
-        selected_booking_type?.membership == "Pay as you attend" &&
+        selected_booking_type?.membership == "Pay as you go" &&
         Number(no_of_guests) > 0
       ) {
         throw createError.BadRequest(
@@ -323,11 +338,67 @@ const EventBookingController = {
       user.markModified("membership");
       await user.save({ session });
 
+      if (
+        payment_option &&
+        payment_option?.toLowerCase() == "card" &&
+        token &&
+        amount
+      ) {
+        try {
+          stripeData = await stripe.paymentIntents.create({
+            amount: Math.ceil(amount * 100), // Amount in cents
+            currency: "ttd",
+            payment_method: token,
+            confirm: true,
+            description: `Registration fee charges for numberfive club`,
+            receipt_email: user.email,
+            metadata: {
+              userId: user?.id,
+              username: user?.first_name,
+              email: user?.email,
+              description: `Registration fee charges for numberfive club`,
+            },
+            automatic_payment_methods: {
+              enabled: true,
+              allow_redirects: "never",
+            },
+          });
+        } catch (stripeError) {
+          throw createError.InternalServerError(
+            stripeError?.raw?.message || "Stripe charge failed"
+          );
+        }
+      }
+
       pdfPath = await generatePDF(dataToSend);
 
       if (pdfPath) {
-        let subject = "Event Ticket";
-        let message = "This is the event ticket";
+        let subject = `Your Ticket for ${event?.event_name} – Confirmation`;
+        let message = `Dear ${user?.first_name},
+        
+        </br>
+        </br>
+
+       <p> Thank you for booking your spot at ${event?.event_name}! We are excited to have you join us.</p>
+        <p>Attached to this email, you will find your ticket for the event. Please keep it handy, as you will need to present it at the entrance.</p>
+        <p>
+        Event Details:
+        <br/>
+        <br/>
+Event Name: ${event?.event_name}
+</br>
+Date: ${event.event_date}
+</br>
+Time: ${event?.event_start_time}
+        </p>
+
+        <p>Thank you once again for your booking, and we look forward to seeing you at the event!
+ </p>
+ 
+
+Best regards,
+
+        `;
 
         guest_details &&
           guest_details?.length > 0 &&
@@ -366,6 +437,14 @@ const EventBookingController = {
         .status(200)
         .json({ message: "Booking created successfully", booking });
     } catch (err) {
+      if (stripeData?.id) {
+        try {
+          await stripe.refunds.create({ payment_intent: stripeData?.id });
+        } catch (refundError) {
+          console.error("Failed to refund Stripe payment:", refundError);
+        }
+      }
+
       if (files && files.length > 0) {
         files.forEach((file, index) => {
           const destinationFolder = path.join(
@@ -490,11 +569,9 @@ const EventBookingController = {
         amount: amount ?? 0,
       };
 
-      console.log(dataToSend, "dataToSend");
 
       pdfPath = await generatePDF(dataToSend);
 
-      console.log(pdfPath, "pathhh");
 
       if (pdfPath) {
         let subject = "Event Ticket";
