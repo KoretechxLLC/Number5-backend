@@ -32,6 +32,21 @@ const membershipHistorySchema = new mongoose.Schema({
   couple_membership_amount: {
     type: Number,
   },
+  transaction_id: {
+    type: String,
+  },
+  amount: {
+    type: String,
+  },
+  payment_method: {
+    type: String,
+  },
+  receipt_url: {
+    type: String,
+  },
+  charge_id: {
+    type: String,
+  },
   purchase_date: {
     type: Date,
   },

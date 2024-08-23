@@ -12,6 +12,7 @@ const bcrypt = require("bcrypt");
 const InpersonRegistrationModel = require("../Models/inperson.registration.model");
 const MembershipHistoryModel = require("../Models/membership.history.model");
 const mongoose = require("mongoose");
+const stripe = require("stripe")(process.env.STRIPE_SK);
 
 const UserController = {
   get: async (req, res, next) => {
@@ -51,7 +52,7 @@ const UserController = {
         country: user?.country,
         is_invited_for_elite_membership: user?.is_invited_for_elite_membership,
         is_elgible_for_executive_membership:
-          user?.is_eligible_for_executive_membership,
+          user?.is_elgible_for_executive_membership,
         is_elgible_for_elite_membership: user?.is_elgible_for_elite_membership,
         city: user?.city,
         postalCode: user?.postalCode,
@@ -129,7 +130,7 @@ const UserController = {
           is_invited_for_elite_membership:
             user?.is_invited_for_elite_membership,
           is_elgible_for_executive_membership:
-            user?.is_eligible_for_executive_membership,
+            user?.is_elgible_for_executive_membership,
           is_elgible_for_elite_membership:
             user?.is_elgible_for_elite_membership,
           sexuality: user?.sexuality,
@@ -232,6 +233,7 @@ const UserController = {
         data: dataToSend,
       });
     } catch (err) {
+      console.log(err, "err");
       if (filename) {
         const destinationFolder = path.join(
           __dirname,
@@ -251,15 +253,23 @@ const UserController = {
     }
   },
   upgrade_membership: async (req, res, next) => {
+    let chargeId;
+
     const session = await mongoose.startSession();
 
     try {
       session.startTransaction();
 
-      let { membership, id, amount } = req.body;
+      let { membership, id, amount, token } = req.body;
 
       if (!membership || Object.keys(membership).length === 0 || !id) {
         throw createError.BadRequest("Required fields are missing");
+      }
+
+      if (membership?.package_name?.toLowerCase() !== "pay as you go") {
+        if (!amount || !token) {
+          throw createError.BadRequest("Required fields are missing");
+        }
       }
 
       let userData = await UserModel.findById(id).session(session);
@@ -371,6 +381,40 @@ const UserController = {
       expiryDate.setMonth(expiryDate.getMonth() + 1);
       membershipData.expiry_date = expiryDate;
 
+      let stripeData;
+
+      if (membership?.package_name?.toLowerCase() !== "pay as you go") {
+        try {
+          stripeData = await stripe.paymentIntents.create({
+            amount: Math.ceil(amount * 100), // Amount in cents
+            currency: "ttd",
+            payment_method: token,
+            confirm: true,
+            description: `Purchase ${membership?.package_name} in numberfive club`,
+            receipt_email: userData.email,
+            metadata: {
+              membership_type: membership?.package_name,
+              description: `Purchase ${membership?.package_name} in numberfive club`,
+            },
+            automatic_payment_methods: {
+              enabled: true,
+              allow_redirects: "never",
+            },
+          });
+        } catch (stripeError) {
+          throw createError.InternalServerError(
+            stripeError?.raw?.message || "Stripe charge failed"
+          );
+        }
+      }
+
+      chargeId = stripeData?.latest_charge;
+
+      let charge;
+      if (chargeId) {
+        charge = await stripe.charges.retrieve(chargeId);
+      }
+
       let updatedUserData = await UserModel.findByIdAndUpdate(
         id,
         { $set: { membership: membershipData } },
@@ -407,6 +451,11 @@ const UserController = {
         female_membership_amount: membershipData?.female_membership_amount,
         couple_membership_amount: membershipData?.couple_membership_amount,
         purchase_date: membershipData?.purchase_date,
+        transaction_id: stripeData?.id,
+        amount: stripeData?.amount,
+        payment_method: stripeData?.payment_method,
+        receipt_url: charge?.receipt_url,
+        charge_id: charge?.id,
         expiry_date: membershipData?.expiry_date,
         default_membership: membershipData?.default_membership,
       };
@@ -415,6 +464,12 @@ const UserController = {
         [dataToSendForHistory],
         { session }
       );
+
+      let email = userData?.email;
+      let subject = "Payment receipt by number5 club";
+      let body = `You have been charge to purchase ${membership?.package_name} Here is you invoice receipt url <a>${charge?.receipt_url}</a>`;
+
+      await sendEmail(email, subject, body);
 
       await session.commitTransaction();
       session.endSession();
@@ -427,6 +482,15 @@ const UserController = {
       });
     } catch (err) {
       await session.abortTransaction();
+
+      if (chargeId) {
+        try {
+          await stripe.refunds.create({ charge: chargeId });
+        } catch (refundError) {
+          console.error("Failed to refund charge:", refundError);
+        }
+      }
+
       session.endSession();
       next(err);
     }
@@ -587,7 +651,7 @@ const UserController = {
             is_invited_for_elite_membership:
               user?.is_invited_for_elite_membership,
             is_elgible_for_executive_membership:
-              user?.is_eligible_for_executive_membership,
+              user?.is_elgible_for_executive_membership,
             is_elgible_for_elite_membership:
               user?.is_elgible_for_elite_membership,
             address: user?.address,
@@ -672,7 +736,7 @@ const UserController = {
             is_invited_for_elite_membership:
               user?.is_invited_for_elite_membership,
             is_elgible_for_executive_membership:
-              user?.is_eligible_for_executive_membership,
+              user?.is_elgible_for_executive_membership,
             is_elgible_for_elite_membership:
               user?.is_elgible_for_elite_membership,
             weight: user?.weight,
@@ -755,7 +819,7 @@ const UserController = {
             is_invited_for_elite_membership:
               user?.is_invited_for_elite_membership,
             is_elgible_for_executive_membership:
-              user?.is_eligible_for_executive_membership,
+              user?.is_elgible_for_executive_membership,
             is_elgible_for_elite_membership:
               user?.is_elgible_for_elite_membership,
             id: user?.id,
@@ -1056,8 +1120,6 @@ const UserController = {
 
       let totalDays = Number(allDays) + Number(lastMembershipDays);
 
-      console.log(totalDays, "totalDasy");
-
       if (totalDays > 180) {
         let user = await UserModel.findById(id);
 
@@ -1065,8 +1127,6 @@ const UserController = {
           user.is_elgible_for_elite_membership = true;
           await user.save();
         }
-
-        console.log(totalDays, "totalDays");
 
         res.status(200).json({
           message: "You are eligible for elite membership",

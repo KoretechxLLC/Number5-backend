@@ -23,6 +23,14 @@ const MessageSchema = new Schema({
     type: String,
     required: true,
   },
+  provided_email : {
+    type : String,
+    required: true
+  },
+  provided_phone_number : {
+    type : String,
+    required: true
+  },
   email: {
     type: String,
     required: true,

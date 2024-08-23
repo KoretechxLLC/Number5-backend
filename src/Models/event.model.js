@@ -40,19 +40,19 @@ const eventSchema = new mongoose.Schema({
   },
   event_regular_single_price: {
     type: Number,
-    required: true,
+    // required: true,
   },
   event_regular_couple_price: {
     type: Number,
-    required: true,
+    // required: true,
   },
   event_premium_single_price: {
     type: Number,
-    required: true,
+    // required: true,
   },
   event_premium_couple_price: {
     type: Number,
-    required: true,
+    // required: true,
   },
   todaySpecial : {
     type : [],

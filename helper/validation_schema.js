@@ -2,6 +2,8 @@ const joi = require("joi");
 
 const authSchema = joi.object({
   registration_type: joi.string()?.lowercase().required(),
+  amount: joi.number(),
+  token: joi.string(),
   couples_type: joi.string().lowercase(),
   profile_pic: joi.string().required(),
   gender: joi.string().required(),
@@ -125,6 +127,8 @@ const changePasswordSchema = joi.object({
 const messageSchema = joi.object({
   subject: joi.string().min(5).max(100).required(),
   message: joi.string().min(10).max(500).required(),
+  provided_email: joi.string().email().lowercase().required(),
+  provided_phone_number: joi.string().required(),
   id: joi.string().required(),
 });
 
@@ -151,10 +155,10 @@ const EventSchema = joi.object({
   longitude: joi.number().required(),
   event_description: joi.string().max(1000).required(),
   event_sop: joi.array().required(),
-  event_regular_single_price: joi.number().required(),
-  event_regular_couple_price: joi.number().required(),
-  event_premium_single_price: joi.number().required(),
-  event_premium_couple_price: joi.number().required(),
+  event_regular_single_price: joi.number(),
+  event_regular_couple_price: joi.number(),
+  event_premium_single_price: joi.number(),
+  event_premium_couple_price: joi.number(),
   event_pic: joi.string().required(),
   id: joi.string(),
   todaySpecial: joi.array(),

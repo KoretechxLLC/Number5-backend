@@ -17,7 +17,12 @@ authRoutes.post(
 
 authRoutes.post(
   "/inperson-registration",
-  uploadProfileImage.single("profileImage"),
+  uploadProfileImage.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "idCardImage", maxCount: 1 },
+    { name: "profileImagePartner", maxCount: 1 },
+    { name: "idCardImagePartner", maxCount: 1 },
+  ]),
   AuthController.inPersonRegistration
 );
 

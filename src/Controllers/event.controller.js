@@ -32,10 +32,6 @@ const EventController = {
         !event_start_time ||
         !event_end_time ||
         !event_date ||
-        !event_regular_single_price ||
-        !event_regular_couple_price ||
-        !event_premium_single_price ||
-        !event_premium_couple_price ||
         !latitude ||
         !longitude ||
         !event_description ||
@@ -224,7 +220,10 @@ const EventController = {
       } else {
         let skip = (page - 1) * size;
         let limit = size;
-        events = await EventModel.find(query).skip(skip).limit(limit).sort({ event_date: -1 });
+        events = await EventModel.find(query)
+          .skip(skip)
+          .limit(limit)
+          .sort({ event_date: -1 });
       }
 
       if (!events || events.length == 0)
@@ -268,10 +267,6 @@ const EventController = {
         !longitude ||
         !event_description ||
         !event_sop ||
-        !event_regular_single_price ||
-        !event_regular_couple_price ||
-        !event_premium_single_price ||
-        !event_premium_couple_price ||
         !id
       ) {
         throw createError.BadRequest("Required fields are missing");

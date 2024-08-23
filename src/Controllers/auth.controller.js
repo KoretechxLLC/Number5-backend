@@ -27,10 +27,17 @@ const fs = require("fs");
 const MembershipModel = require("../Models/membership.model");
 const bcrypt = require("bcrypt");
 const InpersonRegistrationModel = require("../Models/inperson.registration.model");
+const stripe = require("stripe")(process.env.STRIPE_SK);
 
 const AuthController = {
   inPersonRegistration: async (req, res, next) => {
-    let filename = req?.file?.filename;
+    let { files, body } = req;
+
+    let profileImage = files?.profileImage?.[0]?.filename;
+    let idCardImage = files?.idCardImage?.[0]?.filename;
+
+    let partnerProfileImage = files?.profileImagePartner?.[0]?.filename;
+    let partnerIdCardImage = files?.idCardImagePartner?.[0]?.filename;
 
     try {
       let {
@@ -41,9 +48,10 @@ const AuthController = {
         date,
         time,
         registration_type,
+        address,
         gender,
-        genderMember2,
-      } = req.body;
+        partner_details,
+      } = body;
 
       if (
         !first_name ||
@@ -53,63 +61,122 @@ const AuthController = {
         !date ||
         !time ||
         !registration_type ||
-        !filename ||
+        !profileImage ||
+        !idCardImage ||
         !gender
-      )
+      ) {
         throw createError.BadRequest("Required fields are missing");
+      }
 
-      let checkNumber = await UserModel.findOne({ phone_number: phone_number });
+      // Additional checks for couple registration
+      if (registration_type?.toLowerCase() === "couple") {
+        if (!partnerProfileImage || !partnerIdCardImage) {
+          throw createError.BadRequest("Partner's required images are missing");
+        }
+        if (
+          !partner_details?.first_name ||
+          !partner_details?.last_name ||
+          !partner_details?.phone_number ||
+          !partner_details?.gender
+        ) {
+          throw createError.BadRequest("Partner's required fields are missing");
+        }
+      }
 
-      if (checkNumber)
+      // Check if phone number already exists in UserModel or InpersonRegistrationModel
+      let checkNumber = await UserModel.findOne({ phone_number });
+      if (checkNumber) {
         throw createError.BadRequest("Phone number already exists");
+      }
 
       let checkNumberInPerson = await InpersonRegistrationModel.findOne({
-        phone_number: phone_number,
+        phone_number,
       });
-
-      if (checkNumberInPerson)
+      if (checkNumberInPerson) {
         throw createError.BadRequest("Phone number already exists");
+      }
 
-      console.log(filename, "filename");
+      if (registration_type?.toLowerCase() === "couple") {
+        let partnerPhone = partner_details?.phone_number;
+        let partnerCheck = await UserModel.findOne({
+          phone_number: partnerPhone,
+        });
+        if (partnerCheck) {
+          throw createError.BadRequest("Partner's phone number already exists");
+        }
 
-      let dataToSend = {
-        first_name: first_name,
-        last_name: last_name,
-        phone_number: phone_number,
-        date: date,
-        time: time,
-        registration_type: registration_type,
-        profile_pic: filename,
-        message: message,
-        gender: gender,
-        genderMember2: genderMember2,
-      };
+        let partnerCheckInPerson = await InpersonRegistrationModel.findOne({
+          phone_number: partnerPhone,
+        });
+        if (partnerCheckInPerson) {
+          throw createError.BadRequest("Partner's phone number already exists");
+        }
+      }
 
-      console.log(dataToSend, "send");
+      let dataToSend;
+
+      if (registration_type.toLowerCase() == "couple") {
+        dataToSend = {
+          first_name,
+          last_name,
+          phone_number,
+          date,
+          time,
+          registration_type,
+          profile_pic: profileImage,
+          id_card: idCardImage,
+          message,
+          address,
+          gender,
+          partner_profile_pic: partnerProfileImage,
+          partner_id_card: partnerIdCardImage,
+          partner_details,
+        };
+      } else {
+        dataToSend = {
+          first_name,
+          last_name,
+          phone_number,
+          date,
+          time,
+          address,
+          registration_type,
+          profile_pic: profileImage,
+          id_card: idCardImage,
+          message,
+          gender,
+        };
+      }
 
       let userData = await InpersonRegistrationModel.create(dataToSend);
 
       res.status(200).json({
-        message: "Form Successfully submitted",
+        message: "Form successfully submitted",
         status: true,
         data: userData,
       });
     } catch (err) {
-      if (filename) {
+      const deleteFile = (filename) => {
         const destinationFolder = path.join(
           __dirname,
           `../../public/profileImages/${filename}`
         );
         fs.unlink(destinationFolder, (err) => {
           if (err) {
-            console.error("error deleting picture");
+            console.error(`Error deleting file: ${filename}`);
           }
         });
-      }
+      };
+
+      if (profileImage) deleteFile(profileImage);
+      if (idCardImage) deleteFile(idCardImage);
+      if (partnerProfileImage) deleteFile(partnerProfileImage);
+      if (partnerIdCardImage) deleteFile(partnerIdCardImage);
 
       next(err);
     }
   },
+
   registerUser: async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -119,13 +186,13 @@ const AuthController = {
     let partnerImage = files?.partnerImage;
     let profileImageName = profileImage?.[0]?.filename;
     let partnerImageName = partnerImage?.[0]?.filename;
+    let stripeData;
 
     try {
       let userData = req.body;
 
       let {
         registration_type,
-        couples_type,
         gender,
         first_name,
         last_name,
@@ -148,6 +215,8 @@ const AuthController = {
         user_quality,
         partner_details,
         is_agree_terms_and_conditions,
+        token,
+        amount,
       } = userData;
 
       if (!profileImageName)
@@ -245,6 +314,14 @@ const AuthController = {
       if (!user_quality) {
         throw createError.BadRequest("User quality is required.");
       }
+
+      // if (!amount) {
+      //   throw createError.BadRequest("amount is required.");
+      // }
+
+      // if (!token) {
+      //   throw createError.BadRequest("card token is required.");
+      // }
 
       if (
         !is_agree_terms_and_conditions ||
@@ -483,7 +560,7 @@ const AuthController = {
           account_created_by: result?.email,
         });
 
-        const newUser = await user.save();
+        const newUser = await user.save({ session });
         partnerUser = newUser;
       }
 
@@ -518,33 +595,75 @@ const AuthController = {
         email: result.email,
       });
 
-      const newUser = await user.save();
+      const newUser = await user.save({ session });
 
-      let updatePartnerUser;
-      if (partnerUser) {
-        const updateSession = await mongoose.startSession();
-        updateSession.startTransaction();
-
+      if (token && amount) {
         try {
-          updatePartnerUser = await UserModel.findByIdAndUpdate(
-            partnerUser.id,
-            { $set: { partner_ref: newUser.id } },
-            { new: true }
-          ).session(updateSession);
-
-          await updateSession.commitTransaction();
-        } catch (updateError) {
-          await updateSession.abortTransaction();
-          throw createError.InternalServerError();
-        } finally {
-          updateSession.endSession();
+          stripeData = await stripe.paymentIntents.create({
+            amount: Math.ceil(amount * 100), // Amount in cents
+            currency: "ttd",
+            payment_method: token,
+            confirm: true,
+            description: `Registration fee charges for numberfive club`,
+            receipt_email: userData.email,
+            metadata: {
+              userId: userData?.id,
+              username: userData?.first_name,
+              email: userData?.email,
+              description: `Registration fee charges for numberfive club`,
+            },
+            automatic_payment_methods: {
+              enabled: true,
+              allow_redirects: "never",
+            },
+          });
+        } catch (stripeError) {
+          throw createError.InternalServerError(
+            stripeError?.raw?.message || "Stripe charge failed"
+          );
         }
       }
+
       const accessToken = await signAccessToken(newUser.id);
       const refreshToken = await signRefreshToken(newUser.id);
 
       await session.commitTransaction();
       session.endSession();
+
+      let updatePartnerUser;
+
+      console.log(partnerUser, "userrr");
+
+      if (partnerUser) {
+        updatePartnerUser = await UserModel.findByIdAndUpdate(
+          partnerUser.id,
+          { $set: { partner_ref: newUser.id } },
+          { new: true }
+        );
+      }
+
+      let userEmail = newUser?.email;
+      let subject = "Welcome to Number Five Club – Application Received!";
+      let body = `
+      
+      <p>Dear ${newUser.first_name},</p>
+ 
+<p>Thank you for registering with Number Five Club! We are excited to inform you that your application has been successfully received and is currently being processed.</p>
+ 
+<p>Please allow us a maximum of 7 days to review your application. You will receive a notification once your application status is updated.</p>
+ 
+<p>Thank you for your patience, and welcome to our community!</p>
+ 
+Best regards,`;
+      try {
+        let mailInfo = await sendEmail(userEmail, subject, body);
+
+        if (partnerUser) {
+          let mailInfo2 = await sendEmail(partnerUser?.email, subject, body);
+        }
+      } catch (err) {
+        console.log(error, "errorr");
+      }
 
       res.status(200).json({
         message: "User Successfully Registered",
@@ -553,6 +672,14 @@ const AuthController = {
         refreshToken: refreshToken,
       });
     } catch (err) {
+      if (stripeData?.id) {
+        try {
+          await stripe.refunds.create({ payment_intent: stripeData?.id });
+        } catch (refundError) {
+          console.error("Failed to refund Stripe payment:", refundError);
+        }
+      }
+
       await session.abortTransaction();
       session.endSession();
 
@@ -589,11 +716,26 @@ const AuthController = {
   },
   checkUserEmailAndPhoneNumber: async (req, res, next) => {
     try {
-      let { email, phone_number } = req.body;
+      let { email, phone_number, screen } = req.body;
 
       if (!email || !phone_number)
         throw createError.BadRequest("Required fields are missing");
 
+      if (screen == "inperson") {
+        phone_number = phone_number?.split(" ").join("");
+
+        let isPhoneNumberExists = await InpersonRegistrationModel.findOne({
+          phone_number: phone_number,
+        });
+
+        if (isPhoneNumberExists)
+          throw createError.BadRequest("Phone number already exists");
+
+        res.status(200).json({
+          message: "Username and password not registered",
+        });
+        return;
+      }
       let isEmailExists = await UserModel.findOne({ email: email });
 
       if (isEmailExists) throw createError.BadRequest("Email already exists");
@@ -680,7 +822,7 @@ const AuthController = {
         postalCode: user?.postalCode,
         is_invited_for_elite_membership: user?.is_invited_for_elite_membership,
         is_elgible_for_executive_membership:
-          user?.is_eligible_for_executive_membership,
+          user?.is_elgible_for_executive_membership,
         is_elgible_for_elite_membership: user?.is_elgible_for_elite_membership,
         wanted_experience: user?.wanted_experience,
         user_quality: user?.user_quality,
@@ -760,25 +902,36 @@ const AuthController = {
 
       const savedUser = await user.save({ session });
 
-      let subject = "Registration Approval";
-      let message = `Your id has been successfully approved below are your login credentials.
-      
-      <br/>
+      let subject =
+        "Welcome to Number Five Club – Your Application Has Been Approved!";
+      let message = `Dear ${user?.first_name}.
 
+
+        <br/>
+        <br/>
+
+
+      <p>Congratulations! We are pleased to inform you that your application to join Number Five Club has been approved.</p>
+
+       <p>You can now access your member account using the login credentials below:</p>
+      
       username: ${username}
-
       <br/>
-
       password: ${emailPassword}
-      
       <br/>
-    
       membership id: ${membership_id}
+      <br/>
+      card number: ${cardNumber}
 
-      
+      <br/>
       <br/>
 
-      card number: ${cardNumber}
+       <p>We encourage you to log in and explore all the benefits and resources available to our members.</p>
+      
+       <p>Welcome aboard, and we look forward to having you as part of our community!</p>
+      
+      Best regards,
+
       
       `;
 
