@@ -54,7 +54,6 @@ const UserSchema = new Schema({
   },
   postalCode: {
     type: String,
-    required: true,
   },
   occupation: {
     type: String,

@@ -287,9 +287,9 @@ const AuthController = {
         throw createError.BadRequest("City is required.");
       }
 
-      if (!postalCode) {
-        throw createError.BadRequest("Postal code is required.");
-      }
+      // if (!postalCode) {
+      //   throw createError.BadRequest("Postal code is required.");
+      // }
 
       if (!height) {
         throw createError.BadRequest("Height is required.");
@@ -460,9 +460,9 @@ const AuthController = {
           throw createError.BadRequest("City is required.");
         }
 
-        if (!postalCode) {
-          throw createError.BadRequest("Postal code is required.");
-        }
+        // if (!postalCode) {
+        //   throw createError.BadRequest("Postal code is required.");
+        // }
 
         if (!height) {
           throw createError.BadRequest("Height is required.");
@@ -538,7 +538,7 @@ const AuthController = {
           hobbies: partnerData?.hobbies,
           country: partnerData?.country,
           city: partnerData?.city,
-          postalCode: partnerData?.postalCode,
+          postalCode: partnerData?.postalCode ? partnerData?.postalCode : "",
           gender: partnerData?.gender,
           date_of_birth: partnerData?.date_of_birth,
           phone_number: partnerData?.phone_number,
@@ -577,7 +577,7 @@ const AuthController = {
         hobbies: result?.hobbies,
         country: result?.country,
         city: result?.city,
-        postalCode: result?.postalCode,
+        postalCode: result?.postalCode ? result?.postalCode : "",
         occupation: result?.occupation,
         height: result?.height,
         weight: result?.weight,
@@ -600,10 +600,15 @@ const AuthController = {
       if (token && amount) {
         try {
           stripeData = await stripe.paymentIntents.create({
-            amount: Math.ceil(amount * 100), // Amount in cents
+            amount: Math.ceil(amount * 100),
             currency: "ttd",
             payment_method: token,
             confirm: true,
+            payment_method_options: {
+              card: {
+                request_three_d_secure: "automatic", // This will automatically request 3D Secure if needed
+              },
+            },
             description: `Registration fee charges for numberfive club`,
             receipt_email: userData.email,
             metadata: {
@@ -622,6 +627,16 @@ const AuthController = {
             stripeError?.raw?.message || "Stripe charge failed"
           );
         }
+
+        if (
+          stripeData &&
+          (stripeData?.status == "requires_action" ||
+            !stripeData?.latest_charge)
+        ) {
+          throw createError.BadRequest(
+            "Unable to charge payment kindly try another card"
+          );
+        }
       }
 
       const accessToken = await signAccessToken(newUser.id);
@@ -631,8 +646,6 @@ const AuthController = {
       session.endSession();
 
       let updatePartnerUser;
-
-      console.log(partnerUser, "userrr");
 
       if (partnerUser) {
         updatePartnerUser = await UserModel.findByIdAndUpdate(
@@ -669,9 +682,12 @@ Best regards,`;
         message: "User Successfully Registered",
         data: newUser,
         accessToken: accessToken,
+        clientSecret: stripeData?.clientSecret,
         refreshToken: refreshToken,
       });
     } catch (err) {
+      console.log(err, "errrrorrr");
+
       if (stripeData?.id) {
         try {
           await stripe.refunds.create({ payment_intent: stripeData?.id });
@@ -929,7 +945,11 @@ Best regards,`;
        <p>We encourage you to log in and explore all the benefits and resources available to our members.</p>
       
        <p>Welcome aboard, and we look forward to having you as part of our community!</p>
-      
+
+
+       <p>Your home club is located at  Acono Ridge, Maracas Valley St Joseph. When you get to the gates 
+          there is a buzzer on the right hand side just before the gate, ring the buzzer give your name and you will be let in.</p>
+             
       Best regards,
 
       

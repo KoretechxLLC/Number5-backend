@@ -350,13 +350,13 @@ const EventBookingController = {
             currency: "ttd",
             payment_method: token,
             confirm: true,
-            description: `Registration fee charges for numberfive club`,
+            description: `Purchase Event Ticket of Number Five Club`,
             receipt_email: user.email,
             metadata: {
               userId: user?.id,
               username: user?.first_name,
               email: user?.email,
-              description: `Registration fee charges for numberfive club`,
+              description: `Purchase Event Ticket of Number Five Club`,
             },
             automatic_payment_methods: {
               enabled: true,
@@ -366,6 +366,15 @@ const EventBookingController = {
         } catch (stripeError) {
           throw createError.InternalServerError(
             stripeError?.raw?.message || "Stripe charge failed"
+          );
+        }
+
+        if (
+          stripeData?.status == "requires_action" ||
+          !stripeData?.latest_charge
+        ) {
+          throw createError.BadRequest(
+            "Unable to charge payment kindly try another card"
           );
         }
       }
@@ -569,9 +578,7 @@ Best regards,
         amount: amount ?? 0,
       };
 
-
       pdfPath = await generatePDF(dataToSend);
-
 
       if (pdfPath) {
         let subject = "Event Ticket";

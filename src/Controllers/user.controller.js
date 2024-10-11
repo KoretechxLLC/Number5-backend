@@ -70,6 +70,8 @@ const UserController = {
         event_visits: user?.event_visits,
         push_notification_option: user?.push_notification_option,
         is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+        created_at: user?.created_at,
+        approved_date: user?.approved_date,
         role: user?.role,
       };
 
@@ -148,6 +150,8 @@ const UserController = {
           event_visits: user?.event_visits,
           push_notification_option: user?.push_notification_option,
           is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+          created_at: user?.created_at,
+          approved_date: user?.approved_date,
           role: user?.role,
         };
       });
@@ -404,6 +408,15 @@ const UserController = {
         } catch (stripeError) {
           throw createError.InternalServerError(
             stripeError?.raw?.message || "Stripe charge failed"
+          );
+        }
+
+        if (
+          stripeData?.status == "requires_action" ||
+          !stripeData?.latest_charge
+        ) {
+          throw createError.BadRequest(
+            "Unable to charge payment kindly try another card"
           );
         }
       }
@@ -674,6 +687,8 @@ const UserController = {
             event_visits: user?.event_visits,
             push_notification_option: user?.push_notification_option,
             is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+            created_at: user?.created_at,
+            approved_date: user?.approved_date,
             role: user?.role,
           };
         });
@@ -756,6 +771,8 @@ const UserController = {
             event_visits: user?.event_visits,
             push_notification_option: user?.push_notification_option,
             is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+            created_at: user?.created_at,
+            approved_date: user?.approved_date,
             role: user?.role,
           };
         });
@@ -838,6 +855,8 @@ const UserController = {
             event_visits: user?.event_visits,
             push_notification_option: user?.push_notification_option,
             is_agree_terms_and_conditions: user?.is_agree_terms_and_conditions,
+            created_at: user?.created_at,
+            approved_date: user?.approved_date,
             role: user?.role,
           };
         });
